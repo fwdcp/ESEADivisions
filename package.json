@@ -1,0 +1,28 @@
+{
+  "name": "ESEADivisions",
+  "version": "0.1.0",
+  "description": "web application to retrieve and display information about ESEA divisions",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fwdcp/ESEADivisions.git"
+  },
+  "author": "Forward Command Post",
+  "license": "none",
+  "bugs": {
+    "url": "https://github.com/fwdcp/ESEADivisions/issues"
+  },
+  "private": true,
+  "homepage": "https://github.com/fwdcp/ESEADivisions",
+  "dependencies": {
+    "async": "^0.9.0",
+    "express": "^4.11.1",
+    "mongoose": "^3.8.22",
+    "nconf": "^0.7.1",
+    "request": "^2.51.0",
+    "underscore": "^1.7.0"
+  }
+}

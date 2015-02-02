@@ -57,7 +57,7 @@ express.get('/division/:id.json', function(req, res) {
                         var groupInfo = conferenceInfo;
                         groupInfo.group = group.name;
 
-                        async.map(group.active_teams, [], function(teamsToUpdate, teamListing, cb) {
+                        async.map(group.active_teams, function(teamListing, cb) {
                             var teamInfo = groupInfo;
                             teamInfo.team = teamListing.id;
 
@@ -65,31 +65,33 @@ express.get('/division/:id.json', function(req, res) {
                                 if (err) {
                                     cb(err);
                                 }
+                                else {
+                                    if (!teamSeason) {
+                                        teamSeason = new database.TeamSeason(teamInfo);
 
-                                if (!teamSeason) {
-                                    teamSeason = new database.TeamSeason(teamInfo);
+                                        teamSeason.save();
+                                    }
 
-                                    teamSeason.save();
+                                    if (!underscore.isEqual(teamSeason.raw.standings, teamListing)) {
+                                        teamSeason.name = teamListing.name;
+                                        teamSeason.record.wins = teamListing.match_win;
+                                        teamSeason.record.ties = teamListing.match_tie;
+                                        teamSeason.record.losses = teamListing.match_loss;
+                                        teamSeason.record.percentage = teamListing.match_win_pct;
+                                        teamSeason.record.pointsFor = teamListing.point_win;
+                                        teamSeason.record.pointsAgainst = teamListing.point_loss;
+
+                                        teamSeason.raw.standings = teamListing;
+                                        teamSeason.markModified('raw.standings');
+
+                                        teamSeason.save();
+
+                                        cb(null, teamSeason);
+                                    }
+                                    else {
+                                        cb();
+                                    }
                                 }
-
-                                if (!underscore.isEqual(teamSeason.raw.standings, teamListing)) {
-                                    teamSeason.name = teamListing.name;
-                                    teamSeason.record.wins = teamListing.match_win;
-                                    teamSeason.record.ties = teamListing.match_tie;
-                                    teamSeason.record.losses = teamListing.match_loss;
-                                    teamSeason.record.percentage = teamListing.match_win_pct;
-                                    teamSeason.record.pointsFor = teamListing.point_win;
-                                    teamSeason.record.pointsAgainst = teamListing.point_loss;
-
-                                    teamSeason.raw.standings = teamListing;
-                                    teamSeason.markModified('raw.standings');
-
-                                    teamSeason.save();
-
-                                    teamsToUpdate.push(teamSeason);
-                                }
-
-                                cb(null, teamsToUpdate);
                             });
                         }, cb);
                     }, cb);

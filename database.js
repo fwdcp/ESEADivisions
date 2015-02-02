@@ -58,12 +58,14 @@ playerSchema.virtual('experienceRating').get(function() {
 var teamSeasonSchema = new mongoose.Schema({
     team: Number,
     name: String,
-    url: String,
     game: Number,
     season: Number,
     series: Number,
+    event: Number,
+    region: Number,
     division: String,
     conference: String,
+    group: String,
     record: {
         wins: Number,
         ties: Number,
@@ -165,6 +167,7 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                         game: this.game,
                         season: this.season,
                         series: this.series,
+                        event: this.event,
                         division: this.division
                     }
                 }
@@ -179,6 +182,7 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                     game: team.game,
                     season: team.season,
                     series: team.series,
+                    event: team.event,
                     division: team.division
                 });
 
@@ -208,6 +212,7 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                     game: team.game,
                     season: team.season,
                     series: team.series,
+                    event: team.event,
                     division: team.division
                 });
 

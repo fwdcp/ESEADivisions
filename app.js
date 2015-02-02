@@ -3,6 +3,7 @@ var underscore = require('underscore');
 var async = require('async');
 
 var config = require('./config');
+var database = require('./database');
 var express = require('./express');
 
 var jar = request.jar();

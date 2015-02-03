@@ -217,7 +217,7 @@ express.get('/division/:id.json', function(req, res) {
             });
         }],
         "players": ['teamPlayers', function(cb, results) {
-            async.map(results.players, function(player, cb) {
+            async.map(results.teamPlayers, function(player, cb) {
                 request({
                     uri: 'http://play.esea.net/users/' + player.player,
                     qs: {

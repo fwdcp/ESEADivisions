@@ -151,7 +151,7 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
 
                 cb(null, memo);
             }, cb);
-        }]
+        }.bind(this)]
     }, function(err, results) {
         cb(err, results.scheduleStrength);
     });

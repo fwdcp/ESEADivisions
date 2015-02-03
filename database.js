@@ -201,7 +201,7 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                 }
             });
         }.bind(this)],
-        'playedGames': ['teamPlayers', function(cb, results) {
+        'matchesPlayed': ['teamPlayers', function(cb, results) {
             var team = this;
 
             async.map(results.teamPlayers, function(player, cb) {
@@ -225,7 +225,7 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                     cb(err);
                 }
                 else {
-                    cb(null, underscore.partial(underscore.union, results)());
+                    cb(null, underscore.union(underscore.flatten(results)));
                 }
             });
         }.bind(this)]
@@ -234,8 +234,8 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
             cb(err);
         }
         else {
-            if (results.playedGames.length > 0) {
-                cb(null, results.weightedExperienceRating / results.playedGames.length);
+            if (results.matchesPlayed.length > 0) {
+                cb(null, results.weightedExperienceRating / results.matchesPlayed.length);
             }
             else {
                 cb(null, 0);

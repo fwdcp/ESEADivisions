@@ -309,7 +309,9 @@ express.get('/division/:id.json', function(req, res) {
                                     }
                                 });
                             }]
-                        }, cb);
+                        }, function(err, results) {
+                            cb(err, team);
+                        });
                     }, cb);
                 }
             });

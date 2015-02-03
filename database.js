@@ -104,7 +104,7 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
         'regularSeasonMatches': function(cb) {
             var processed = 0;
 
-            async.filterSeries(this.matches, function(match, cb) {
+            async.filterSeries(matches, function(match, cb) {
                 if (processed >= played) {
                     cb(false);
                 }
@@ -122,8 +122,6 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
             });
         },
         'opposingTeamStrengths': ['regularSeasonMatches', function(cb, results) {
-            var season = this.season;
-
             async.map(results.regularSeasonMatches, function(match, cb) {
                 mongoose.model('TeamSeason').findOne({
                     season: season,

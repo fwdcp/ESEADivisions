@@ -66,7 +66,7 @@ express.get('/division/:id.json', function(req, res) {
                                 }
                                 else {
                                     if (!teamSeason) {
-                                        teamSeason = new database.TeamSeason(teamInfo);
+                                        teamSeason = new database.TeamSeason(this);
 
                                         teamSeason.save();
                                     }
@@ -91,7 +91,7 @@ express.get('/division/:id.json', function(req, res) {
                                         cb();
                                     }
                                 }
-                            });
+                            }.bind(teamInfo));
                         }, cb);
                     }, cb);
                 }
@@ -194,19 +194,19 @@ express.get('/division/:id.json', function(req, res) {
                             else {
                                 if (!playerDoc) {
                                     playerDoc = new database.Player({
-                                        player: player.id
+                                        player: this.id
                                     });
 
                                     playerDoc.save();
                                 }
 
-                                playerDoc.alias = player.alias;
+                                playerDoc.alias = this.alias;
 
                                 playerDoc.save();
 
                                 cb(null, playerDoc);
                             }
-                        });
+                        }.bind(player));
                     }, cb);
                 }
                 else {

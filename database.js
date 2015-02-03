@@ -96,9 +96,12 @@ var teamSeasonSchema = new mongoose.Schema({
 });
 
 teamSeasonSchema.methods.getScheduleStrength = function(cb) {
+    var played = this.record.wins + this.record.ties + this.record.losses;
+    var matches = this.matches;
+    var season = this.season;
+
     async.auto({
         'regularSeasonMatches': function(cb) {
-            var played = this.record.wins + this.record.ties + this.record.losses;
             var processed = 0;
 
             async.filterSeries(this.matches, function(match, cb) {
@@ -117,7 +120,7 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
             }, function(matches) {
                 cb(null, matches);
             });
-        }.bind(this),
+        },
         'opposingTeamStrengths': ['regularSeasonMatches', function(cb, results) {
             var season = this.season;
 
@@ -134,7 +137,7 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
                     }
                 });
             }, cb);
-        }.bind(this)]
+        }]
     }, function(err, results) {
         if (err) {
             cb(err);

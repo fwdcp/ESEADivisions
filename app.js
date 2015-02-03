@@ -310,7 +310,7 @@ express.get('/division/:id.json', function(req, res) {
                                 });
                             }]
                         }, cb);
-                    });
+                    }, cb);
                 }
             });
         }]

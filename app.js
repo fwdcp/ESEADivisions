@@ -291,7 +291,8 @@ express.get('/division/:id.json', function(req, res) {
                             var team = results.team;
                             team.scheduleStrength = results.scheduleStrength;
                             team.experienceRating = results.experienceRating;
-                            
+                            delete team.raw;
+
                             cb(err, team);
                         });
                     }, cb);

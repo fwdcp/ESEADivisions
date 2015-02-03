@@ -81,8 +81,8 @@ express.get('/division/:id.json', function(req, res) {
                                         teamSeason.record.pointsAgainst = teamListing.point_loss;
 
                                         teamSeason.raw.standings = teamListing;
-                                        teamSeason.markModified('raw.standings');
 
+                                        teamSeason.markModified('raw.standings');
                                         teamSeason.save();
 
                                         cb(null, teamSeason);
@@ -120,8 +120,8 @@ express.get('/division/:id.json', function(req, res) {
                     }
                     else {
                         teamSeason.raw.history = body;
-                        teamSeason.markModified('raw.history');
 
+                        teamSeason.markModified('raw.history');
                         teamSeason.save();
 
                         cb(null, teamSeason);
@@ -168,6 +168,7 @@ express.get('/division/:id.json', function(req, res) {
                         else {
                             teamSeason.matches = results;
 
+                            teamSeason.markModified('matches');
                             teamSeason.save();
 
                             cb(null, teamSeason);
@@ -232,8 +233,8 @@ express.get('/division/:id.json', function(req, res) {
                     }
                     else {
                         player.raw.history = body;
-                        player.markModified('raw.history');
 
+                        player.markModified('raw.history');
                         player.save();
 
                         async.map(player.raw.history.history_teams, function(teamSeason, cb) {
@@ -254,6 +255,7 @@ express.get('/division/:id.json', function(req, res) {
                             else {
                                 player.teams = results;
 
+                                player.markModified('teams');
                                 player.save();
 
                                 cb(null, player);

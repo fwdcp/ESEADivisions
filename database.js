@@ -9,7 +9,6 @@ mongoose.connect(config.get('app:database'));
 var playerSchema = new mongoose.Schema({
     player: Number,
     alias: String,
-    url: String,
     teams: [{
         id: Number,
         name: String,
@@ -87,7 +86,8 @@ var teamSeasonSchema = new mongoose.Schema({
         gamesFor: Number,
         gamesAgainst: Number,
         pointsFor: Number,
-        pointsAgainst: Number
+        pointsAgainst: Number,
+        result: String
     }],
     raw: {
         standings: Object,

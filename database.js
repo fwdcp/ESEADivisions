@@ -184,8 +184,8 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                     division: team.division
                 });
 
-                if (season) {
-                    cb(null, season.matches.length * player.experienceRating);
+                if (season && player.experienceRating[team.game]) {
+                    cb(null, season.matches.length * player.experienceRating[team.game]);
                 }
                 else {
                     cb(null, 0);
@@ -225,7 +225,7 @@ teamSeasonSchema.methods.getExperienceRating = function(cb) {
                     cb(err);
                 }
                 else {
-                    cb(null, underscore.partial(underscore.union, results));
+                    cb(null, underscore.partial(underscore.union, results)());
                 }
             });
         }.bind(this)]

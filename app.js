@@ -277,39 +277,21 @@ express.get('/division/:id.json', function(req, res) {
                 }
                 else {
                     async.map(teamSeasons, function(teamSeason, cb) {
-                        var team;
-
                         async.auto({
                             'team': function(cb) {
-                                team = teamSeason.toObject();
-
-                                cb();
+                                cb(null, teamSeason.toObject());
                             },
                             'scheduleStrength': ['team', function(cb) {
-                                teamSeason.getScheduleStrength(function(err, scheduleStrength) {
-                                    if (err) {
-                                        cb(err);
-                                    }
-                                    else {
-                                        team.scheduleStrength = scheduleStrength;
-
-                                        cb();
-                                    }
-                                });
+                                teamSeason.getScheduleStrength(cb);
                             }],
                             'experienceRating': ['team', function(cb) {
-                                teamSeason.getExperienceRating(function(err, experienceRating) {
-                                    if (err) {
-                                        cb(err);
-                                    }
-                                    else {
-                                        team.experienceRating = experienceRating;
-
-                                        cb();
-                                    }
-                                });
+                                teamSeason.getExperienceRating(cb);
                             }]
                         }, function(err, results) {
+                            var team = results.team;
+                            team.scheduleStrength = results.scheduleStrength;
+                            team.experienceRating = results.experienceRating;
+                            
                             cb(err, team);
                         });
                     }, cb);

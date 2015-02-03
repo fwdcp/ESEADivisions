@@ -135,8 +135,8 @@ express.get('/division/:id.json', function(req, res) {
                     async.map(underscore.values(teamSeason.raw.history.team_matches), function(match, cb) {
                         var matchInfo = {
                             id: match.id,
-                            startTime: match.time_start,
-                            endTime: match.time_end,
+                            startTime: new Date(match.time_start * 1000),
+                            endTime: new Date(match.time_end * 1000),
                             status: match.state,
                             outcomeType: match.outcome_type,
                             atFault: match.outcome_team_at_fault == teamSeason.team,

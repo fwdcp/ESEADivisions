@@ -166,11 +166,9 @@ express.get('/division/:id.json', function(req, res) {
                             cb(err);
                         }
                         else {
-                            teamSeason.matches.splice(0, teamSeason.matches.length);
-                            underscore.each(results, function(match) {
-                                teamSeason.matches.push(match);
-                            });
-                            
+                            teamSeason.matches = results;
+
+                            teamSeason.markModified('matches');
                             teamSeason.save();
 
                             cb(null, teamSeason);
@@ -255,11 +253,9 @@ express.get('/division/:id.json', function(req, res) {
                                 cb(err);
                             }
                             else {
-                                player.teams.splice(0, player.teams.length);
-                                underscore.each(results, function(team) {
-                                    player.teams.push(team);
-                                });
+                                player.teams = results;
 
+                                player.markModified('teams');
                                 player.save();
 
                                 cb(null, player);

@@ -105,12 +105,10 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
                 if (processed >= played) {
                     cb(false);
                 }
-
-                if (match.status == 'completed') {
+                else if (match.status == 'completed') {
                     processed++;
                     cb(true);
                 }
-
                 else {
                     cb(false);
                 }
@@ -151,7 +149,7 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
 
                 cb(null, memo);
             }, cb);
-        }.bind(this)]
+        }]
     }, function(err, results) {
         cb(err, results.scheduleStrength);
     });

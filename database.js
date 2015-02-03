@@ -134,8 +134,12 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
                     }
                 });
             }, cb);
-        }.bind(this)],
-        'scheduleStrength': ['opposingTeamStrengths', function(cb, results) {
+        }.bind(this)]
+    }, function(err, results) {
+        if (err) {
+            cb(err);
+        }
+        else {
             async.reduce(results.opposingTeamStrengths, {
                 wins: 0,
                 ties: 0,
@@ -151,9 +155,7 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
 
                 cb(null, memo);
             }, cb);
-        }]
-    }, function(err, results) {
-        cb(err, results.scheduleStrength);
+        }
     });
 };
 

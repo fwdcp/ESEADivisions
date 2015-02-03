@@ -91,7 +91,7 @@ express.get('/division/:id.json', function(req, res) {
                                         cb();
                                     }
                                 }
-                            }.bind(teamInfo));
+                            }.bind(underscore.clone(teamInfo)));
                         }, cb);
                     }, cb);
                 }

@@ -128,7 +128,28 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
                         cb(err);
                     }
                     else {
-                        cb(null, teamSeason.record);
+                        if (teamSeason) {
+                            teamSeason.getExperienceRating(function(err, experienceRating) {
+                                cb(err, underscore.extend({
+                                    wins: 0,
+                                    ties: 0,
+                                    losses: 0,
+                                    pointsFor: 0,
+                                    pointsAgainst: 0,
+                                    experienceRating: 0
+                                }, teamSeason.record, {experienceRating: experienceRating}));
+                            });
+                        }
+                        else {
+                            cb(null, {
+                                wins: 0,
+                                ties: 0,
+                                losses: 0,
+                                pointsFor: 0,
+                                pointsAgainst: 0,
+                                experienceRating: 0
+                            });
+                        }
                     }
                 });
             }, cb);
@@ -139,13 +160,15 @@ teamSeasonSchema.methods.getScheduleStrength = function(cb) {
                 ties: 0,
                 losses: 0,
                 pointsFor: 0,
-                pointsAgainst: 0
+                pointsAgainst: 0,
+                experienceRating: 0
             }, function(memo, record, cb) {
                 memo.wins += record.wins;
                 memo.ties += record.ties;
                 memo.losses += record.losses;
                 memo.pointsFor += record.pointsFor;
                 memo.pointsAgainst += record.pointsAgainst;
+                memo.experienceRating += record.experienceRating;
 
                 cb(null, memo);
             }, cb);

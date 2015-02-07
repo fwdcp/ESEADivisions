@@ -94,15 +94,15 @@ express.get('/divisions/:id.json', function(req, res) {
         "teamsToUpdate": ['esea', 'division', function(cb, results) {
             async.map(results.esea.stem_tournaments, function(conference, cb) {
                 if (conference.type == 'regular season') {
-                    var conferenceInfo = results.division;
+                    var conferenceInfo = underscore.clone(results.division);
                     conferenceInfo.conference = conference.location;
 
                     async.map(conference.groups, function(group, cb) {
-                        var groupInfo = conferenceInfo;
+                        var groupInfo = underscore.clone(conferenceInfo);
                         groupInfo.group = group.name;
 
                         async.map(group.active_teams, function(teamListing, cb) {
-                            var teamInfo = groupInfo;
+                            var teamInfo = underscore.clone(groupInfo);
                             teamInfo.team = teamListing.id;
 
                             database.TeamSeason.findOne(teamInfo, function(err, teamSeason) {
@@ -136,7 +136,7 @@ express.get('/divisions/:id.json', function(req, res) {
                                         cb();
                                     }
                                 }
-                            }.bind(underscore.clone(teamInfo)));
+                            }.bind(teamInfo));
                         }, cb);
                     }, cb);
                 }

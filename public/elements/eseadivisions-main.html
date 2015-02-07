@@ -79,7 +79,9 @@
                     this.$.divisionRetrievedNotification.show();
                 }
 
-                this.$.teams.teams = _.toArray(_.groupBy(this.teams, 'group'));
+                this.$.teams.teams = _.flatten(_.map(_.groupBy(this.teams, 'conference'), function(conference) {
+                    return _.toArray(_.groupBy(conference, 'group'));
+                }), true);
             },
             "toggleControls": function(event, detail, sender) {
                 this.$.main.togglePanel();

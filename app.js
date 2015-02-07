@@ -9,7 +9,51 @@ var express = require('./express');
 var jar = request.jar();
 jar.setCookie(request.cookie('viewed_welcome_page=1'), 'http://play.esea.net');
 
-express.get('/division/:id.json', function(req, res) {
+express.get('/divisions/list.json', function(req, res) {
+    async.auto({
+        "esea": function(cb) {
+            request({
+                uri: 'http://play.esea.net/index.php',
+                qs: {
+                    's': 'league',
+                    'd': 'standings'
+                },
+                json: true,
+                jar: jar
+            }, function(err, http, body) {
+                if (err || http.statusCode != 200) {
+                    cb(err || http.statusCode);
+                }
+                else {
+                    if (body.division && body.stem_tournaments) {
+                        cb(null, body);
+                    }
+                    else {
+                        cb(404);
+                    }
+                }
+            });
+        },
+        "divisions": ['esea', function(cb, results) {
+            cb(null, underscore.map(results.esea, function(season, seasonName) {
+                return underscore.map(season, function(region, regionName) {
+                    return underscore.map(region, function(divisionName, division) {
+                        return {
+                            id: division,
+                            season: seasonName,
+                            region: regionName,
+                            division: divisionName
+                        };
+                    });
+                });
+            }));
+        }]
+    }, function(err, results) {
+        res.json(err || results.divisions);
+    });
+});
+
+express.get('/divisions/:id.json', function(req, res) {
     async.auto({
         "esea": function(cb) {
             request({

@@ -112,25 +112,20 @@ async.auto({
                                                 teamSeason.save();
                                             }
 
-                                            if (!underscore.isEqual(teamSeason.raw.standings, teamListing)) {
-                                                teamSeason.name = teamListing.name;
-                                                teamSeason.record.wins = teamListing.match_win;
-                                                teamSeason.record.ties = teamListing.match_tie;
-                                                teamSeason.record.losses = teamListing.match_loss;
-                                                teamSeason.record.percentage = teamListing.match_win_pct;
-                                                teamSeason.record.pointsFor = teamListing.point_win;
-                                                teamSeason.record.pointsAgainst = teamListing.point_loss;
+                                            teamSeason.name = teamListing.name;
+                                            teamSeason.record.wins = teamListing.match_win;
+                                            teamSeason.record.ties = teamListing.match_tie;
+                                            teamSeason.record.losses = teamListing.match_loss;
+                                            teamSeason.record.percentage = teamListing.match_win_pct;
+                                            teamSeason.record.pointsFor = teamListing.point_win;
+                                            teamSeason.record.pointsAgainst = teamListing.point_loss;
 
-                                                teamSeason.raw.standings = teamListing;
-                                                teamSeason.markModified('raw.standings');
+                                            teamSeason.raw.standings = teamListing;
+                                            teamSeason.markModified('raw.standings');
 
-                                                teamSeason.save();
+                                            teamSeason.save();
 
-                                                cb(null, teamSeason);
-                                            }
-                                            else {
-                                                cb();
-                                            }
+                                            cb(null, teamSeason);
                                         }
                                     }.bind(teamInfo));
                                 }, cb);
@@ -259,7 +254,7 @@ async.auto({
                     });
                 }],
                 "players": ['teamPlayers', function(cb, results) {
-                    async.mapLimit(results.teamPlayers, 1, function(player, cb) {
+                    async.eachLimit(results.teamPlayers, 1, function(player, cb) {
                         ratelimiter.removeTokens(1, function() {
                             request({
                                 uri: 'http://play.esea.net/users/' + player.player,
@@ -307,76 +302,8 @@ async.auto({
                         });
                     }, cb);
                 }],
-                "teamsToRecalculate": ['players', 'teamsHistory', 'division', function(cb, results) {
-                    async.auto({
-                        "teams": function(cb) {
-                            async.map(results.teamsHistory, function(teamSeason, cb) {
-                                var teams = underscore.pluck(teamSeason.matches, 'opposingTeam');
-
-                                teams.push(teamSeason.team);
-
-                                cb(null, teams);
-                            }, function(err, results) {
-                                if (err) {
-                                    cb(err);
-                                }
-                                else {
-                                    cb(null, underscore.union(underscore.flatten(results)));
-                                }
-                            });
-                        },
-                        "playerTeams": function(cb) {
-                            async.map(results.players, function(player, cb) {
-                                async.map(player.teams, function(team, cb) {
-                                    database.TeamSeason.findOne(underscore.extend({
-                                        team: team.id
-                                    }, underscore.pick(team, 'game', 'season', 'series', 'event', 'division')), function(err, teamSeason) {
-                                        if (err) {
-                                            cb(err);
-                                        }
-                                        else {
-                                            if (teamSeason) {
-                                                cb(null, teamSeason.team);
-                                            }
-                                            else {
-                                                cb();
-                                            }
-                                        }
-                                    });
-                                }, function(err, results) {
-                                    if (err) {
-                                        cb(err);
-                                    }
-                                    else {
-                                        cb(null, underscore.compact(results));
-                                    }
-                                });
-                            }, function(err, results) {
-                                if (err) {
-                                    cb(err);
-                                }
-                                else {
-                                    cb(null, underscore.union(underscore.flatten(results)));
-                                }
-                            });
-                        }
-                    }, function(err, results) {
-                        if (err) {
-                            cb(err);
-                        }
-                        else {
-                            var teams = underscore.union(results.teams, results.playerTeams);
-
-                            async.map(teams, function(team, cb) {
-                                var teamInfo = underscore.extend({}, results.division, {team: team});
-
-                                database.TeamSeason.findOne(teamInfo, cb);
-                            }, cb);
-                        }
-                    });
-                }],
-                "experienceRating": ['teamsToRecalculate', function(cb, results) {
-                    async.map(results.teamsToRecalculate, function(teamSeason, cb) {
+                "experienceRating": ['teamsHistory', function(cb, results) {
+                    async.map(results.teamsHistory, function(teamSeason, cb) {
                         async.auto({
                             'teamPlayers': function(cb) {
                                 database.Player.find({
@@ -550,18 +477,6 @@ async.auto({
                             }
                         });
                     }, cb);
-                }],
-                "renderedTeams": ['division', 'scheduleStrength', function(cb, results) {
-                    database.TeamSeason.find(results.division, function(err, teamSeasons) {
-                        if (err) {
-                            cb(err);
-                        }
-                        else {
-                            async.map(teamSeasons, function(teamSeason, cb) {
-                                cb(null, underscore.omit(teamSeason.toObject(), 'raw'));
-                            }, cb);
-                        }
-                    });
                 }]
             }, function(err, results) {
                 if (err) {

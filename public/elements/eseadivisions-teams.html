@@ -25,7 +25,7 @@
                     <sortable-column name="opponentExperienceRating" formula="function(row) { return +row.scheduleStrength.experienceRating; }"><abbr title="Schedule of Strength - Opponent Experience Rating">SOS-ER</abbr></sortable-column>
 
                     <template id="rowTemplate">
-                        <td>{{record.fields.name.value}}</td>
+                        <td><a href="http://play.esea.net/team/{{record.row.team}}">{{record.fields.name.value}}</a></td>
                         <td>{{record.fields.wins.value}}</td>
                         <td>{{record.fields.losses.value}}</td>
                         <td>{{record.fields.ties.value}}</td>

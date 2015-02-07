@@ -7,9 +7,13 @@
             <template repeat="{{group in teams}}">
                 <sortable-table class="default">
                     <sortable-column name="name">Team</sortable-column>
-                    <sortable-column name="wins" formula="function(row) { return +row.record.wins; }">Wins</sortable-column>
-                    <sortable-column name="losses" formula="function(row) { return +row.record.losses; }">Losses</sortable-column>
-                    <sortable-column name="ties" formula="function(row) { return +row.record.ties; }">Ties</sortable-column>
+                    <sortable-column name="wins" formula="function(row) { return +row.record.wins; }"><abbr title="Wins">W</abbr></sortable-column>
+                    <sortable-column name="losses" formula="function(row) { return +row.record.losses; }"><abbr title="Losses">L</abbr></sortable-column>
+                    <sortable-column name="ties" formula="function(row) { return +row.record.ties; }"><abbr title="Ties">T</abbr></sortable-column>
+                    <sortable-column name="percentage" formula="function(row) { return ((+row.record.wins + (0.5 * +row.record.ties)) / (+row.record.wins + +row.record.losses + +row.record.ties)).toFixed(3); }"><abbr title="Record Percentage">PCT</abbr></sortable-column>
+                    <sortable-column name="roundsFor" formula="function(row) { return +row.record.pointsFor; }"><abbr title="Rounds For">RF</abbr></sortable-column>
+                    <sortable-column name="roundsAgainst" formula="function(row) { return +row.record.pointsAgainst; }"><abbr title="Rounds Against">RA</abbr></sortable-column>
+                    <sortable-column name="roundsPercentage" formula="function(row) { return ((+row.record.pointsFor) / (+row.record.pointsFor + +row.record.pointsAgainst)).toFixed(3); }"><abbr title="Rounds Percentage">RPCT</abbr></sortable-column>
 
                     {{group | toJSON}}
                 </sortable-table>

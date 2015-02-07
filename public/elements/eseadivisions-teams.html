@@ -11,7 +11,7 @@
                     <sortable-column name="losses" formula="function(row) { return +row.record.losses; }">Losses</sortable-column>
                     <sortable-column name="ties" formula="function(row) { return +row.record.ties; }">Ties</sortable-column>
 
-                    {{group}}
+                    {{group | toJSON}}
                 </sortable-table>
             </template>
         </div>
@@ -19,7 +19,10 @@
 
     <script>
         Polymer({
-            "teams": []
+            "teams": [],
+            "toJSON": function(value) {
+                return JSON.stringify(value);
+            }
         });
     </script>
 </polymer-element>

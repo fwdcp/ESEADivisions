@@ -4,8 +4,8 @@
 <polymer-element name="eseadivisions-teams" attributes="teams">
     <template>
         <div id="container">
-            <template repeat="{{group in teams}}" rowTemplate="rowTemplate">
-                <sortable-table class="default">
+            <template repeat="{{group in teams}}">
+                <sortable-table class="default" rowTemplate="rowTemplate">
                     <sortable-column name="name">Team</sortable-column>
                     <sortable-column name="wins" formula="function(row) { return +row.record.wins; }"><abbr title="Wins">W</abbr></sortable-column>
                     <sortable-column name="losses" formula="function(row) { return +row.record.losses; }"><abbr title="Losses">L</abbr></sortable-column>

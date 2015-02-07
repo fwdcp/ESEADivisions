@@ -42,7 +42,7 @@
                             <td>{{[team.scheduleStrength.wins, team.scheduleStrength.losses, team.scheduleStrength.ties] | getPercentage}}</td>
                             <td>{{team.scheduleStrength.pointsFor}}</td>
                             <td>{{team.scheduleStrength.pointsAgainst}}</td>
-                            <td>{{[team.record.pointsFor, team.scheduleStrength.pointsAgainst, 0] | getPercentage}}</td>
+                            <td>{{[team.scheduleStrength.pointsFor, team.scheduleStrength.pointsAgainst, 0] | getPercentage}}</td>
                             <td>{{team.experienceRating}}</td>
                             <td>{{team.scheduleStrength.experienceRating}}</td>
                         </tr>

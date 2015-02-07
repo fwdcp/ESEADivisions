@@ -329,7 +329,9 @@ express.get('/divisions/:id.json', function(req, res) {
                 "playerTeams": function(cb) {
                     async.map(results.players, function(player, cb) {
                         async.map(player.teams, function(team, cb) {
-                            database.TeamSeason.findOne(underscore.pick(team, 'id', 'game', 'season', 'series', 'event', 'division'), function(err, teamSeason) {
+                            database.TeamSeason.findOne(underscore.extend({
+                                team: team.id
+                            }, underscore.pick(team, 'game', 'season', 'series', 'event', 'division')), function(err, teamSeason) {
                                 if (err) {
                                     cb(err);
                                 }

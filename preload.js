@@ -486,8 +486,10 @@ async.auto({
                     console.log(err);
                 }
                 else {
-                    console.log('processed division ' + division + ' with ' + (results.teamsToUpdate ? results.teamsToUpdate.length : 0) + ' teams in ' + console.timeEnd('division'));
+                    console.log('processed division ' + division + ' with ' + (results.teamsToUpdate ? results.teamsToUpdate.length : 0) + ' teams');
                 }
+
+                console.timeEnd('division')
 
                 cb(err);
             });

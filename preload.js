@@ -1,6 +1,7 @@
 var request = require('request');
 var underscore = require('underscore');
 var async = require('async');
+var limiter = require('limiter');
 
 var config = require('./config');
 var database = require('./database');
@@ -8,29 +9,33 @@ var database = require('./database');
 var jar = request.jar();
 jar.setCookie(request.cookie('viewed_welcome_page=1'), 'http://play.esea.net');
 
+var ratelimiter = new limiter.RateLimiter(60, 'minute');
+
 async.auto({
     "esea": function(cb) {
-        request({
-            uri: 'http://play.esea.net/index.php',
-            qs: {
-                's': 'league',
-                'd': 'standings',
-                'format': 'json'
-            },
-            json: true,
-            jar: jar
-        }, function(err, http, body) {
-            if (err || http.statusCode != 200) {
-                cb(err || http.statusCode);
-            }
-            else {
-                if (body.select_division_id) {
-                    cb(null, body);
+        ratelimiter.removeTokens(1, function() {
+            request({
+                uri: 'http://play.esea.net/index.php',
+                qs: {
+                    's': 'league',
+                    'd': 'standings',
+                    'format': 'json'
+                },
+                json: true,
+                jar: jar
+            }, function(err, http, body) {
+                if (err || http.statusCode != 200) {
+                    cb(err || http.statusCode);
                 }
                 else {
-                    cb(404);
+                    if (body.select_division_id) {
+                        cb(null, body);
+                    }
+                    else {
+                        cb(404);
+                    }
                 }
-            }
+            });
         });
     },
     "divisions": ['esea', function(cb, results) {
@@ -46,28 +51,30 @@ async.auto({
         async.eachLimit(results.divisions, 1, function(division, cb) {
             async.auto({
                 "esea": function(cb) {
-                    request({
-                        uri: 'http://play.esea.net/index.php',
-                        qs: {
-                            's': 'league',
-                            'd': 'standings',
-                            'division_id': division,
-                            'format': 'json'
-                        },
-                        json: true,
-                        jar: jar
-                    }, function(err, http, body) {
-                        if (err || http.statusCode != 200) {
-                            cb(err || http.statusCode);
-                        }
-                        else {
-                            if (body.division && body.stem_tournaments) {
-                                cb(null, body);
+                    ratelimiter.removeTokens(1, function() {
+                        request({
+                            uri: 'http://play.esea.net/index.php',
+                            qs: {
+                                's': 'league',
+                                'd': 'standings',
+                                'division_id': division,
+                                'format': 'json'
+                            },
+                            json: true,
+                            jar: jar
+                        }, function(err, http, body) {
+                            if (err || http.statusCode != 200) {
+                                cb(err || http.statusCode);
                             }
                             else {
-                                cb(404);
+                                if (body.division && body.stem_tournaments) {
+                                    cb(null, body);
+                                }
+                                else {
+                                    cb(404);
+                                }
                             }
-                        }
+                        });
                     });
                 },
                 "division": ['esea', function(cb, results) {
@@ -138,28 +145,30 @@ async.auto({
                 }],
                 "teamsHistory": ['teamsToUpdate', function(cb, results) {
                     async.mapLimit(results.teamsToUpdate, 1, function(teamSeason, cb) {
-                        request({
-                            uri: 'http://play.esea.net/teams/' + teamSeason.team,
-                            qs: {
-                                'tab': 'league',
-                                'period[type]': 'seasons',
-                                'period[season_start]': teamSeason.series,
-                                'format': 'json'
-                            },
-                            json: true,
-                            jar: jar
-                        }, function(err, http, body) {
-                            if (err || http.statusCode != 200) {
-                                cb(err || http.statusCode);
-                            }
-                            else {
-                                teamSeason.raw.history = body;
-                                teamSeason.markModified('raw.history');
+                        ratelimiter.removeTokens(1, function() {
+                            request({
+                                uri: 'http://play.esea.net/teams/' + teamSeason.team,
+                                qs: {
+                                    'tab': 'league',
+                                    'period[type]': 'seasons',
+                                    'period[season_start]': teamSeason.series,
+                                    'format': 'json'
+                                },
+                                json: true,
+                                jar: jar
+                            }, function(err, http, body) {
+                                if (err || http.statusCode != 200) {
+                                    cb(err || http.statusCode);
+                                }
+                                else {
+                                    teamSeason.raw.history = body;
+                                    teamSeason.markModified('raw.history');
 
-                                teamSeason.save();
+                                    teamSeason.save();
 
-                                cb(null, teamSeason);
-                            }
+                                    cb(null, teamSeason);
+                                }
+                            });
                         });
                     }, cb);
                 }],
@@ -232,13 +241,12 @@ async.auto({
                                             });
 
                                             playerDoc.save();
+
+                                            cb(null, playerDoc);
                                         }
-
-                                        playerDoc.alias = this.alias;
-
-                                        playerDoc.save();
-
-                                        cb(null, playerDoc);
+                                        else {
+                                            cb();
+                                        }
                                     }
                                 }.bind(player));
                             }, cb);
@@ -252,48 +260,50 @@ async.auto({
                 }],
                 "players": ['teamPlayers', function(cb, results) {
                     async.mapLimit(results.teamPlayers, 1, function(player, cb) {
-                        request({
-                            uri: 'http://play.esea.net/users/' + player.player,
-                            qs: {
-                                'tab': 'history',
-                                'format': 'json'
-                            },
-                            json: true,
-                            jar: jar
-                        }, function(err, http, body) {
-                            if (err || http.statusCode != 200) {
-                                cb(err || http.statusCode);
-                            }
-                            else {
-                                player.raw.history = body;
-                                player.markModified('raw.history');
+                        ratelimiter.removeTokens(1, function() {
+                            request({
+                                uri: 'http://play.esea.net/users/' + player.player,
+                                qs: {
+                                    'tab': 'history',
+                                    'format': 'json'
+                                },
+                                json: true,
+                                jar: jar
+                            }, function(err, http, body) {
+                                if (err || http.statusCode != 200) {
+                                    cb(err || http.statusCode);
+                                }
+                                else {
+                                    player.raw.history = body;
+                                    player.markModified('raw.history');
 
-                                player.save();
+                                    player.save();
 
-                                async.map(player.raw.history.history_teams, function(teamSeason, cb) {
-                                    cb(null, {
-                                        id: teamSeason.id,
-                                        name: teamSeason.name,
-                                        game: teamSeason.game_id,
-                                        season: teamSeason.season,
-                                        series: teamSeason.stem_seriesid,
-                                        event: teamSeason.stem_eventid,
-                                        division: teamSeason.division_level,
-                                        matches: underscore.keys(teamSeason.matches)
+                                    async.map(player.raw.history.history_teams, function(teamSeason, cb) {
+                                        cb(null, {
+                                            id: teamSeason.id,
+                                            name: teamSeason.name,
+                                            game: teamSeason.game_id,
+                                            season: teamSeason.season,
+                                            series: teamSeason.stem_seriesid,
+                                            event: teamSeason.stem_eventid,
+                                            division: teamSeason.division_level,
+                                            matches: underscore.keys(teamSeason.matches)
+                                        });
+                                    }, function(err, results) {
+                                        if (err) {
+                                            cb(err);
+                                        }
+                                        else {
+                                            player.teams = results;
+
+                                            player.save();
+
+                                            cb(null, player);
+                                        }
                                     });
-                                }, function(err, results) {
-                                    if (err) {
-                                        cb(err);
-                                    }
-                                    else {
-                                        player.teams = results;
-
-                                        player.save();
-
-                                        cb(null, player);
-                                    }
-                                });
-                            }
+                                }
+                            });
                         });
                     }, cb);
                 }],

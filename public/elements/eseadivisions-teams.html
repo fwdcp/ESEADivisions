@@ -50,9 +50,11 @@
         </div>
     </template>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
+
     <script>
         PolymerExpressions.prototype.normalizeDecimal =  function(value) {
-            return +value.toFixed(3);
+            return numeral(value).format('0.000');
         };
 
         Polymer({

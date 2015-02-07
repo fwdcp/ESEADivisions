@@ -22,7 +22,7 @@
         <core-header-panel flex>
             <core-toolbar>
                 <span>ESEA Divisions</span>
-                <paper-dropdown-menu label="Division" on-core-select="selectDivision">
+                <paper-dropdown-menu label="Division" on-core-select="{{selectDivision}}">
                     <paper-dropdown class="dropdown">
                         <core-menu class="menu">
                             <template repeat="{{division in divisions}}">

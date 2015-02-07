@@ -16,7 +16,8 @@ express.get('/divisions/list.json', function(req, res) {
                 uri: 'http://play.esea.net/index.php',
                 qs: {
                     's': 'league',
-                    'd': 'standings'
+                    'd': 'standings',
+                    'format': 'json'
                 },
                 json: true,
                 jar: jar

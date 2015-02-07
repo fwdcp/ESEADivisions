@@ -21,12 +21,12 @@
 
         <core-header-panel flex>
             <core-toolbar>
-                <span flex>ESEA Divisions</span>
+                <span>ESEA Divisions</span>
                 <paper-dropdown-menu label="Division">
                     <paper-dropdown class="dropdown">
                         <core-menu class="menu">
                             <template repeat="{{division in divisions}}">
-                                <paper-item></paper-item>
+                                <paper-item data-division-id="{{division.id}}">{{division.season}} {{division.region}} {{division.division}}</paper-item>
                             </template>
                         </core-menu>
                     </paper-dropdown>
@@ -61,11 +61,13 @@
 
     <script>
     Polymer({
-        "matches": [],
-        "showResults": false,
-        "showTeamInfo": false,
+        "divisions": [],
+        "teams": [],
         "updateDivisions": function(event, detail, sender) {
-
+            if (sender.response) {
+                this.divisions = sender.response;
+                this.$.matchesUpdatedNotification.show();
+            }
         },
         "updateDivision": function(event, detail, sender) {
 

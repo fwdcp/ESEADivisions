@@ -309,18 +309,62 @@ express.get('/divisions/:id.json', function(req, res) {
             }, cb);
         }],
         "teamsToRecalculate": ['players', 'teamsHistory', 'division', function(cb, results) {
-            async.map(results.teamsHistory, function(teamSeason, cb) {
-                var teams = underscore.pluck(teamSeason.matches, 'opposingTeam');
+            async.auto({
+                "teams": function(cb) {
+                    async.map(results.teamsHistory, function(teamSeason, cb) {
+                        var teams = underscore.pluck(teamSeason.matches, 'opposingTeam');
 
-                teams.push(teamSeason.team);
+                        teams.push(teamSeason.team);
 
-                cb(null, teams);
+                        cb(null, teams);
+                    }, function(err, results) {
+                        if (err) {
+                            cb(err);
+                        }
+                        else {
+                            cb(null, underscore.union(underscore.flatten(results)));
+                        }
+                    });
+                },
+                "playerTeams": function(cb) {
+                    async.map(results.players, function(player, cb) {
+                        async.map(player.teams, function(team, cb) {
+                            database.TeamSeason.findOne(underscore.pick(team, 'id', 'game', 'season', 'series', 'event', 'division'), function(err, teamSeason) {
+                                if (err) {
+                                    cb(err);
+                                }
+                                else {
+                                    if (teamSeason) {
+                                        cb(null, teamSeason.team);
+                                    }
+                                    else {
+                                        cb();
+                                    }
+                                }
+                            });
+                        }, function(err, results) {
+                            if (err) {
+                                cb(err);
+                            }
+                            else {
+                                cb(null, underscore.compact(results));
+                            }
+                        });
+                    }, function(err, results) {
+                        if (err) {
+                            cb(err);
+                        }
+                        else {
+                            cb(null, underscore.union(underscore.flatten(results)));
+                        }
+                    });
+                }
             }, function(err, results) {
                 if (err) {
                     cb(err);
                 }
                 else {
-                    var teams = underscore.union(underscore.flatten(results));
+                    var teams = underscore.union(results.teams, results.playerTeams);
 
                     async.map(teams, function(team, cb) {
                         var teamInfo = underscore.extend({}, results.division, {team: team});

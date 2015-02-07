@@ -489,7 +489,7 @@ express.get('/divisions/:id.json', function(req, res) {
                             memo.pointsAgainst += record.pointsAgainst;
                             memo.experienceRating += record.experienceRating;
 
-                            cb(null, memo);
+                            return memo;
                         }, {
                             wins: 0,
                             ties: 0,

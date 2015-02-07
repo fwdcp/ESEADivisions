@@ -2,52 +2,54 @@
 
 <polymer-element name="eseadivisions-teams" attributes="teams">
     <template>
-        <template repeat="{{group in teams}}">
-            <table class="tablesorter">
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th><abbr title="Wins">W</abbr></th>
-                        <th><abbr title="Losses">L</abbr></th>
-                        <th><abbr title="Ties">T</abbr></th>
-                        <th><abbr title="Record Percentage">%</abbr></th>
-                        <th><abbr title="Rounds For">RF</abbr></th>
-                        <th><abbr title="Rounds Against">RA</abbr></th>
-                        <th><abbr title="Round Percentage">R%</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Wins">SOS-W</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Losses">SOS-L</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Ties">SOS-T</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Record Percentage">SOS-%</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Rounds For">SOS-RF</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Rounds Against">SOS-RA</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Round Percentage">SOS-R%</abbr></th>
-                        <th><abbr title="Experience Rating">ER</abbr></th>
-                        <th><abbr title="Strength of Schedule - Opponent Experience Rating">SOS-ER</abbr></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr template repeat="{{team in group}}">
-                        <td>{{team.name}}</td>
-                        <td>{{team.record.wins}}</td>
-                        <td>{{team.record.losses}}</td>
-                        <td>{{team.record.ties}}</td>
-                        <td>{{[team.record.wins, team.record.losses, team.record.ties] | getPercentage}}</td>
-                        <td>{{team.record.pointsFor}}</td>
-                        <td>{{team.record.pointsAgainst}}</td>
-                        <td>{{[team.record.pointsFor, team.record.pointsAgainst, 0] | getPercentage}}</td>
-                        <td>{{team.scheduleStrength.wins}}</td>
-                        <td>{{team.scheduleStrength.losses}}</td>
-                        <td>{{team.scheduleStrength.ties}}</td>
-                        <td>{{[team.scheduleStrength.wins, team.scheduleStrength.losses, team.scheduleStrength.ties] | getPercentage}}</td>
-                        <td>{{team.scheduleStrength.pointsFor}}</td>
-                        <td>{{team.scheduleStrength.pointsAgainst}}</td>
-                        <td>{{[team.record.pointsFor, team.scheduleStrength.pointsAgainst, 0] | getPercentage}}</td>
-                        <td>{{team.experienceRating}}</td>
-                        <td>{{team.scheduleStrength.experienceRating}}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </template>
+        <div id="container">
+            <template repeat="{{group in teams}}">
+                <table class="tablesorter">
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th><abbr title="Wins">W</abbr></th>
+                            <th><abbr title="Losses">L</abbr></th>
+                            <th><abbr title="Ties">T</abbr></th>
+                            <th><abbr title="Record Percentage">%</abbr></th>
+                            <th><abbr title="Rounds For">RF</abbr></th>
+                            <th><abbr title="Rounds Against">RA</abbr></th>
+                            <th><abbr title="Round Percentage">R%</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Wins">SOS-W</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Losses">SOS-L</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Ties">SOS-T</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Record Percentage">SOS-%</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Rounds For">SOS-RF</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Rounds Against">SOS-RA</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Round Percentage">SOS-R%</abbr></th>
+                            <th><abbr title="Experience Rating">ER</abbr></th>
+                            <th><abbr title="Strength of Schedule - Opponent Experience Rating">SOS-ER</abbr></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr template repeat="{{team in group}}">
+                            <td>{{team.name}}</td>
+                            <td>{{team.record.wins}}</td>
+                            <td>{{team.record.losses}}</td>
+                            <td>{{team.record.ties}}</td>
+                            <td>{{[team.record.wins, team.record.losses, team.record.ties] | getPercentage}}</td>
+                            <td>{{team.record.pointsFor}}</td>
+                            <td>{{team.record.pointsAgainst}}</td>
+                            <td>{{[team.record.pointsFor, team.record.pointsAgainst, 0] | getPercentage}}</td>
+                            <td>{{team.scheduleStrength.wins}}</td>
+                            <td>{{team.scheduleStrength.losses}}</td>
+                            <td>{{team.scheduleStrength.ties}}</td>
+                            <td>{{[team.scheduleStrength.wins, team.scheduleStrength.losses, team.scheduleStrength.ties] | getPercentage}}</td>
+                            <td>{{team.scheduleStrength.pointsFor}}</td>
+                            <td>{{team.scheduleStrength.pointsAgainst}}</td>
+                            <td>{{[team.record.pointsFor, team.scheduleStrength.pointsAgainst, 0] | getPercentage}}</td>
+                            <td>{{team.experienceRating}}</td>
+                            <td>{{team.scheduleStrength.experienceRating}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+        </div>
     </template>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -57,7 +59,7 @@
         Polymer({
             "teams": [],
             "teamsChanged": function(oldValue, newValue) {
-                $("table").tablesorter({
+                $(this.$.container.querySelectorAll("table")).tablesorter({
                     sortList: [[1,1],[2,0],[4,1],[5,1]]
                 });
             },

@@ -320,7 +320,7 @@ express.get('/divisions/:id.json', function(req, res) {
                     cb(err);
                 }
                 else {
-                    var teams = underscore.union(results);
+                    var teams = underscore.union(underscore.flatten(results));
 
                     async.map(teams, function(team, cb) {
                         var teamInfo = underscore.extend({}, results.division, {team: team});

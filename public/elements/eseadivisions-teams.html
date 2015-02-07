@@ -29,19 +29,19 @@
                         <td>{{record.fields.wins.value}}</td>
                         <td>{{record.fields.losses.value}}</td>
                         <td>{{record.fields.ties.value}}</td>
-                        <td>{{record.fields.percentage.value.toFixed(3)}}</td>
+                        <td>{{record.fields.percentage.value | normalizeDecimal}}</td>
                         <td>{{record.fields.roundsFor.value}}</td>
                         <td>{{record.fields.roundsAgainst.value}}</td>
-                        <td>{{record.fields.roundsPercentage.value.toFixed(3)}}</td>
+                        <td>{{record.fields.roundsPercentage.value | normalizeDecimal}}</td>
                         <td>{{record.fields.opponentWins.value}}</td>
                         <td>{{record.fields.opponentLosses.value}}</td>
                         <td>{{record.fields.opponentTies.value}}</td>
-                        <td>{{record.fields.opponentPercentage.value.toFixed(3)}}</td>
+                        <td>{{record.fields.opponentPercentage.value | normalizeDecimal}}</td>
                         <td>{{record.fields.opponentRoundsFor.value}}</td>
                         <td>{{record.fields.opponentRoundsAgainst.value}}</td>
-                        <td>{{record.fields.opponentRoundsPercentage.value.toFixed(3)}}</td>
-                        <td>{{record.fields.experienceRating.value.toFixed(3)}}</td>
-                        <td>{{record.fields.opponentExperienceRating.value.toFixed(3)}}</td>
+                        <td>{{record.fields.opponentRoundsPercentage.value | normalizeDecimal}}</td>
+                        <td>{{record.fields.experienceRating.value | normalizeDecimal}}</td>
+                        <td>{{record.fields.opponentExperienceRating.value | normalizeDecimal}}</td>
                     </template>
 
                     {{group | toJSON}}
@@ -55,6 +55,9 @@
             "teams": [],
             "toJSON": function(value) {
                 return JSON.stringify(value);
+            },
+            "normalizeDecimal": function(value) {
+                return +value | normalizeDecimal;
             }
         });
     </script>

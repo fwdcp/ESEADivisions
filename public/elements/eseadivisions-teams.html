@@ -13,13 +13,14 @@
                         <th><abbr title="Record Percentage">%</abbr></th>
                         <th><abbr title="Rounds For">RF</abbr></th>
                         <th><abbr title="Rounds Against">RA</abbr></th>
-                        <th><abbr title="Rounds Percentage">R%</abbr></th>
+                        <th><abbr title="Round Percentage">R%</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Wins">SOS-W</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Losses">SOS-L</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Ties">SOS-T</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Record Percentage">SOS-%</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Rounds For">SOS-RF</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Rounds Against">SOS-RA</abbr></th>
+                        <th><abbr title="Strength of Schedule - Opponent Round Percentage">SOS-R%</abbr></th>
                         <th><abbr title="Experience Rating">ER</abbr></th>
                         <th><abbr title="Strength of Schedule - Opponent Experience Rating">SOS-ER</abbr></th>
                     </tr>
@@ -30,17 +31,17 @@
                         <td>{{team.record.wins}}</td>
                         <td>{{team.record.losses}}</td>
                         <td>{{team.record.ties}}</td>
-                        <td>{{(team.record.wins + (0.5 * team.record.ties)) / (team.record.wins + team.record.losses + team.record.ties)}}</td>
+                        <td>{{[team.record.wins, team.record.losses, team.record.ties] | getPercentage}}</td>
                         <td>{{team.record.pointsFor}}</td>
                         <td>{{team.record.pointsAgainst}}</td>
-                        <td>{{(team.record.pointsFor) / (team.record.pointsFor + team.record.pointsAgainst)}}</td>
+                        <td>{{[team.record.pointsFor, team.record.pointsAgainst, 0] | getPercentage}}</td>
                         <td>{{team.scheduleStrength.wins}}</td>
                         <td>{{team.scheduleStrength.losses}}</td>
                         <td>{{team.scheduleStrength.ties}}</td>
-                        <td>{{(team.scheduleStrength.wins + (0.5 * team.scheduleStrength.ties)) / (team.scheduleStrength.wins + team.scheduleStrength.losses + team.scheduleStrength.ties)}}</td>
+                        <td>{{[team.scheduleStrength.wins, team.scheduleStrength.losses, team.scheduleStrength.ties] | getPercentage}}</td>
                         <td>{{team.scheduleStrength.pointsFor}}</td>
                         <td>{{team.scheduleStrength.pointsAgainst}}</td>
-                        <td>{{(team.scheduleStrength.pointsFor) / (team.record.pointsFor + team.scheduleStrength.pointsAgainst)}}</td>
+                        <td>{{[team.record.pointsFor, team.scheduleStrength.pointsAgainst, 0] | getPercentage}}</td>
                         <td>{{team.experienceRating}}</td>
                         <td>{{team.scheduleStrength.experienceRating}}</td>
                     </tr>
@@ -59,6 +60,9 @@
                 $("table").tablesorter({
                     sortList: [[1,1],[2,0],[4,1],[5,1]]
                 });
+            },
+            "getPercentage": function(value) {
+                return ((value[0] + 0.5 * value[2]) / (value[0] + value[1] + value[2])).toFixed(3);
             }
         });
     </script>

@@ -36,7 +36,7 @@ express.get('/divisions/list.json', function(req, res) {
             });
         },
         "divisions": ['esea', function(cb, results) {
-            cb(null, underscore.map(results.esea.select_division_id, function(season, seasonName) {
+            cb(null, underscore.flatten(underscore.map(results.esea.select_division_id, function(season, seasonName) {
                 return underscore.map(season, function(region, regionName) {
                     return underscore.map(region, function(divisionName, division) {
                         return {
@@ -47,7 +47,7 @@ express.get('/divisions/list.json', function(req, res) {
                         };
                     });
                 });
-            }));
+            })));
         }]
     }, function(err, results) {
         res.json(err || results.divisions);

@@ -513,9 +513,7 @@ express.get('/divisions/:id.json', function(req, res) {
                 }
                 else {
                     async.map(teamSeasons, function(teamSeason, cb) {
-                        delete teamSeason.raw;
-
-                        cb(null, teamSeason);
+                        cb(null, underscore.omit(teamSeason.toObject(), 'raw'));
                     }, cb);
                 }
             });

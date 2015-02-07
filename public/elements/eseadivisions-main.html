@@ -56,41 +56,40 @@
         on-core-error="{{retrievalError}}"></core-ajax>
     </template>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
 
     <script>
-    Polymer({
-        "divisions": [],
-        "teams": [],
-        "selectedDivision": null,
-        "updateDivisions": function(event, detail, sender) {
-            if (sender.response) {
-                this.divisions = sender.response;
-            }
-        },
-        "selectDivision": function(event, detail, sender) {
-            if (detail.isSelected) {
-                this.selectedDivision = detail.item.dataset.divisionId;
-            }
-        },
-        "updateDivision": function(event, detail, sender) {
-            if (this.selectedDivision && sender.response) {
-                this.teams = sender.response;
-                this.$.divisionRetrievedNotification.show();
-            }
+        Polymer({
+            "divisions": [],
+            "teams": [],
+            "selectedDivision": null,
+            "updateDivisions": function(event, detail, sender) {
+                if (sender.response) {
+                    this.divisions = sender.response;
+                }
+            },
+            "selectDivision": function(event, detail, sender) {
+                if (detail.isSelected) {
+                    this.selectedDivision = detail.item.dataset.divisionId;
+                }
+            },
+            "updateDivision": function(event, detail, sender) {
+                if (this.selectedDivision && sender.response) {
+                    this.teams = sender.response;
+                    this.$.divisionRetrievedNotification.show();
+                }
 
-            this.$.teams.teams = this.teams;
-        },
-        "toggleControls": function(event, detail, sender) {
-            this.$.main.togglePanel();
-        },
-        "retrievalError": function(event, detail, sender) {
-            this.$.divisionRetrievalFailedNotification.show();
-        },
-        "refreshDivision": function(event, detail, sender) {
-            this.$.divisionAPI.go();
-        }
-    });
+                this.$.teams.teams = _.toArray(_.groupBy(this.teams, 'group'));
+            },
+            "toggleControls": function(event, detail, sender) {
+                this.$.main.togglePanel();
+            },
+            "retrievalError": function(event, detail, sender) {
+                this.$.divisionRetrievalFailedNotification.show();
+            },
+            "refreshDivision": function(event, detail, sender) {
+                this.$.divisionAPI.go();
+            }
+        });
     </script>
 </polymer-element>

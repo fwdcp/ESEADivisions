@@ -51,13 +51,14 @@
     </template>
 
     <script>
+        PolymerExpressions.prototype.normalizeDecimal =  function(value) {
+            return +value.toFixed(3);
+        };
+
         Polymer({
             "teams": [],
             "toJSON": function(value) {
                 return JSON.stringify(value);
-            },
-            "normalizeDecimal": function(value) {
-                return +value | normalizeDecimal;
             }
         });
     </script>

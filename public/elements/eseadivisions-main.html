@@ -1,0 +1,84 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/core-ajax/core-ajax.html">
+<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="../bower_components/core-menu/core-menu.html">
+<link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../bower_components/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="eseadivisions-teams.html">
+
+<polymer-element name="eseadivisions-main">
+    <template>
+        <link rel="stylesheet" href="../bower_components/materialize/dist/css/materialize.min.css">
+        <style>
+            [main] {
+                padding: 20px;
+                overflow: auto;
+            }
+        </style>
+
+        <core-header-panel flex>
+            <core-toolbar>
+                <span flex>ESEA Divisions</span>
+                <paper-dropdown-menu label="Division">
+                    <paper-dropdown class="dropdown">
+                        <core-menu class="menu">
+                            <template repeat="{{division in divisions}}">
+                                <paper-item></paper-item>
+                            </template>
+                        </core-menu>
+                    </paper-dropdown>
+                </paper-dropdown-menu>
+            </core-toolbar>
+            <div main class="content">
+                <eseadivisions-teams id="divisions"></eseadivisions-teams>
+            </div>
+        </core-header-panel>
+
+        <paper-toast text="Division info has been retrieved." id="divisionRetrievedNotification"></paper-toast>
+        <paper-toast text="Error retrieving division info." id="divisionRetrievalFailedNotification"><div on-click="{{refreshDivision}}">Retry</div></paper-toast>
+
+        <core-ajax
+        url="/divisions/list.json"
+        handleAs="json"
+        auto
+        id="divisionList"
+        on-core-response="{{updateDivisions}}"></core-ajax>
+
+        <core-ajax
+        url="/divisions/{{selectedDivision}}.json"
+        handleAs="json"
+        auto
+        id="divisionAPI"
+        on-core-response="{{updateDivision}}"
+        on-core-error="{{retrievalError}}"></core-ajax>
+    </template>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+
+    <script>
+    Polymer({
+        "matches": [],
+        "showResults": false,
+        "showTeamInfo": false,
+        "updateDivisions": function(event, detail, sender) {
+
+        },
+        "updateDivision": function(event, detail, sender) {
+
+        },
+        "toggleControls": function(event, detail, sender) {
+            this.$.main.togglePanel();
+        },
+        "retrievalError": function(event, detail, sender) {
+            this.$.divisionRetrievalFailedNotification.show();
+        },
+        "refreshDivision": function(event, detail, sender) {
+            this.$.divisionAPI.go();
+        }
+    });
+    </script>
+</polymer-element>

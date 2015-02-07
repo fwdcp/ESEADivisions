@@ -296,7 +296,7 @@ async.auto({
 
                                             player.save();
 
-                                            cb(null, player);
+                                            cb();
                                         }
                                     });
                                 }
@@ -486,7 +486,7 @@ async.auto({
                     console.log(err);
                 }
                 else {
-                    console.log('processed division ' + division + ' with ' + results.teamsToUpdate.length + ' teams and ' + results.players.length + ' new players in ' + console.timeEnd('division'));
+                    console.log('processed division ' + division + ' with ' + (results.teamsToUpdate ? results.teamsToUpdate.length : 0) + ' teams in ' + console.timeEnd('division'));
                 }
 
                 cb(err);

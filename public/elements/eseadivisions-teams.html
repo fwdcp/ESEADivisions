@@ -21,7 +21,7 @@
                     <sortable-column name="opponentRoundsFor" formula="function(row) { return +row.scheduleStrength.pointsFor; }"><abbr title="Schedule of Strength - Opponent Rounds For">SOS-RF</abbr></sortable-column>
                     <sortable-column name="opponentRoundsAgainst" formula="function(row) { return +row.scheduleStrength.pointsAgainst; }"><abbr title="Schedule of Strength - Opponent Rounds Against">SOS-RA</abbr></sortable-column>
                     <sortable-column name="opponentRoundsPercentage" formula="function(row) { return ((+row.scheduleStrength.pointsFor) / (+row.scheduleStrength.pointsFor + +row.scheduleStrength.pointsAgainst)).toFixed(3); }"><abbr title="Schedule of Strength - Opponent Rounds Percentage">SOS-RPCT</abbr></sortable-column>
-                    <sortable-column name="experienceRating" formula="function(row) { return +row.experienceRating.toFixed(3); }"><abbr title="Experience Rating">ER</abbr></sortable-column>
+                    <sortable-column name="experienceRating"><abbr title="Experience Rating">ER</abbr></sortable-column>
                     <sortable-column name="opponentExperienceRating" formula="function(row) { return +row.scheduleStrength.experienceRating.toFixed(3); }"><abbr title="Schedule of Strength - Opponent Experience Rating">SOS-ER</abbr></sortable-column>
 
                     {{group | toJSON}}

@@ -49,6 +49,8 @@ async.auto({
     }],
     "divisionInfo": ['divisions', function(cb, results) {
         async.eachLimit(results.divisions, 1, function(division, cb) {
+            console.time('division');
+
             async.auto({
                 "esea": function(cb) {
                     ratelimiter.removeTokens(1, function() {
@@ -484,7 +486,7 @@ async.auto({
                     console.log(err);
                 }
                 else {
-                    console.log('division processed: ' + division);
+                    console.log('processed division ' + division + ' with ' + results.teamsToUpdate.length + ' teams and ' + results.players.length + ' new players in ' console.timeEnd('division'));
                 }
 
                 cb(err);

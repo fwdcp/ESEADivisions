@@ -73,6 +73,16 @@ var teamSeasonSchema = new mongoose.Schema({
         pointsFor: Number,
         pointsAgainst: Number
     },
+    experienceRating: Number,
+    scheduleStrength: {
+        wins: Number,
+        ties: Number,
+        losses: Number,
+        percentage: Number,
+        pointsFor: Number,
+        pointsAgainst: Number,
+        experienceRating: Number
+    },
     matches: [{
         id: Number,
         startTime: Date,
@@ -94,178 +104,6 @@ var teamSeasonSchema = new mongoose.Schema({
         history: Object
     }
 });
-
-teamSeasonSchema.methods.getScheduleStrength = function(cb) {
-    async.auto({
-        'regularSeasonMatches': function(cb) {
-            var played = this.record.wins + this.record.ties + this.record.losses;
-            var processed = 0;
-
-            async.filterSeries(this.matches, function(match, cb) {
-                if (processed >= played) {
-                    cb(false);
-                }
-                else if (match.status == 'completed') {
-                    processed++;
-                    cb(true);
-                }
-                else {
-                    cb(false);
-                }
-            }, function(matches) {
-                cb(null, matches);
-            });
-        }.bind(this),
-        'opposingTeamStrengths': ['regularSeasonMatches', function(cb, results) {
-            var season = this.season;
-
-            async.map(results.regularSeasonMatches, function(match, cb) {
-                mongoose.model('TeamSeason').findOne({
-                    season: season,
-                    team: match.opposingTeam
-                }, function(err, teamSeason) {
-                    if (err) {
-                        cb(err);
-                    }
-                    else {
-                        if (teamSeason) {
-                            teamSeason.getExperienceRating(function(err, experienceRating) {
-                                cb(err, underscore.extend({
-                                    wins: 0,
-                                    ties: 0,
-                                    losses: 0,
-                                    pointsFor: 0,
-                                    pointsAgainst: 0,
-                                    experienceRating: 0
-                                }, teamSeason.record, {experienceRating: experienceRating}));
-                            });
-                        }
-                        else {
-                            cb(null, {
-                                wins: 0,
-                                ties: 0,
-                                losses: 0,
-                                pointsFor: 0,
-                                pointsAgainst: 0,
-                                experienceRating: 0
-                            });
-                        }
-                    }
-                });
-            }, cb);
-        }.bind(this)],
-        'scheduleStrength': ['opposingTeamStrengths', function(cb, results) {
-            async.reduce(results.opposingTeamStrengths, {
-                wins: 0,
-                ties: 0,
-                losses: 0,
-                pointsFor: 0,
-                pointsAgainst: 0,
-                experienceRating: 0
-            }, function(memo, record, cb) {
-                memo.wins += record.wins;
-                memo.ties += record.ties;
-                memo.losses += record.losses;
-                memo.pointsFor += record.pointsFor;
-                memo.pointsAgainst += record.pointsAgainst;
-                memo.experienceRating += record.experienceRating;
-
-                cb(null, memo);
-            }, cb);
-        }]
-    }, function(err, results) {
-        cb(err, results.scheduleStrength);
-    });
-};
-
-teamSeasonSchema.methods.getExperienceRating = function(cb) {
-    async.auto({
-        'teamPlayers': function(cb) {
-            mongoose.model('Player').find({
-                teams: {
-                    $elemMatch: {
-                        id: this.team,
-                        game: this.game,
-                        season: this.season,
-                        series: this.series,
-                        event: this.event,
-                        division: this.division
-                    }
-                }
-            }, cb);
-        }.bind(this),
-        'weightedExperienceRating': ['teamPlayers', function(cb, results) {
-            var team = this;
-
-            async.map(results.teamPlayers, function(player, cb) {
-                var season = underscore.findWhere(player.teams, {
-                    id: team.team,
-                    game: team.game,
-                    season: team.season,
-                    series: team.series,
-                    event: team.event,
-                    division: team.division
-                });
-
-                if (season && player.experienceRating[team.game]) {
-                    cb(null, season.matches.length * player.experienceRating[team.game]);
-                }
-                else {
-                    cb(null, 0);
-                }
-            }, function(err, results) {
-                if (err) {
-                    cb(err);
-                }
-                else {
-                    async.reduce(results, 0, function(total, player, cb) {
-                        cb(null, total + player);
-                    }, cb);
-                }
-            });
-        }.bind(this)],
-        'matchesPlayed': ['teamPlayers', function(cb, results) {
-            var team = this;
-
-            async.map(results.teamPlayers, function(player, cb) {
-                var season = underscore.findWhere(player.teams, {
-                    id: team.team,
-                    game: team.game,
-                    season: team.season,
-                    series: team.series,
-                    event: team.event,
-                    division: team.division
-                });
-
-                if (season) {
-                    cb(null, season.matches);
-                }
-                else {
-                    cb(null, []);
-                }
-            }, function(err, results) {
-                if (err) {
-                    cb(err);
-                }
-                else {
-                    cb(null, underscore.union(underscore.flatten(results)));
-                }
-            });
-        }.bind(this)]
-    }, function(err, results) {
-        if (err) {
-            cb(err);
-        }
-        else {
-            if (results.matchesPlayed.length > 0) {
-                cb(null, results.weightedExperienceRating / results.matchesPlayed.length);
-            }
-            else {
-                cb(null, 0);
-            }
-        }
-    });
-};
 
 exports.mongoose = mongoose;
 exports.Player = mongoose.model('Player', playerSchema);

@@ -9,7 +9,7 @@ var database = require('./database');
 var jar = request.jar();
 jar.setCookie(request.cookie('viewed_welcome_page=1'), 'http://play.esea.net');
 
-var ratelimiter = new limiter.RateLimiter(60, 'minute');
+var ratelimiter = new limiter.RateLimiter(1, 'second');
 
 async.auto({
     "esea": function(cb) {

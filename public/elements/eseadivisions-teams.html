@@ -14,6 +14,13 @@
                     <sortable-column name="roundsFor" formula="function(row) { return +row.record.pointsFor; }"><abbr title="Rounds For">RF</abbr></sortable-column>
                     <sortable-column name="roundsAgainst" formula="function(row) { return +row.record.pointsAgainst; }"><abbr title="Rounds Against">RA</abbr></sortable-column>
                     <sortable-column name="roundsPercentage" formula="function(row) { return ((+row.record.pointsFor) / (+row.record.pointsFor + +row.record.pointsAgainst)).toFixed(3); }"><abbr title="Rounds Percentage">RPCT</abbr></sortable-column>
+                    <sortable-column name="opponentWins" formula="function(row) { return +row.scheduleStrength.wins; }"><abbr title="Schedule of Strength - Opponent Wins">SOS-W</abbr></sortable-column>
+                    <sortable-column name="opponentLosses" formula="function(row) { return +row.scheduleStrength.losses; }"><abbr title="Schedule of Strength - Opponent Losses">SOS-L</abbr></sortable-column>
+                    <sortable-column name="opponentTies" formula="function(row) { return +row.scheduleStrength.ties; }"><abbr title="Schedule of Strength - Opponent Ties">SOS-T</abbr></sortable-column>
+                    <sortable-column name="opponentPercentage" formula="function(row) { return ((+row.scheduleStrength.wins + (0.5 * +row.scheduleStrength.ties)) / (+row.scheduleStrength.wins + +row.scheduleStrength.losses + +row.scheduleStrength.ties)).toFixed(3); }"><abbr title="Schedule of Strength - Opponent Record Percentage">SOS-PCT</abbr></sortable-column>
+                    <sortable-column name="opponentRoundsFor" formula="function(row) { return +row.scheduleStrength.pointsFor; }"><abbr title="Schedule of Strength - Opponent Rounds For">SOS-RF</abbr></sortable-column>
+                    <sortable-column name="opponentRoundsAgainst" formula="function(row) { return +row.scheduleStrength.pointsAgainst; }"><abbr title="Schedule of Strength - Opponent Rounds Against">SOS-RA</abbr></sortable-column>
+                    <sortable-column name="opponentRoundsPercentage" formula="function(row) { return ((+row.scheduleStrength.pointsFor) / (+row.scheduleStrength.pointsFor + +row.scheduleStrength.pointsAgainst)).toFixed(3); }"><abbr title="Schedule of Strength - Opponent Rounds Percentage">SOS-RPCT</abbr></sortable-column>
 
                     {{group | toJSON}}
                 </sortable-table>

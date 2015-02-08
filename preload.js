@@ -2,6 +2,7 @@ var request = require('request');
 var underscore = require('underscore');
 var async = require('async');
 var limiter = require('limiter');
+var commander = require('commander');
 
 var config = require('./config');
 var database = require('./database');
@@ -11,140 +12,160 @@ jar.setCookie(request.cookie('viewed_welcome_page=1'), 'http://play.esea.net');
 
 var ratelimiter = new limiter.RateLimiter(1, 'second');
 
+commander
+    .version('0.1.0')
+    .option('--skip-divisions', 'skip retrieving teams from divisions')
+    .parse(process.argv);
+
 async.auto({
     "esea": function(cb) {
-        ratelimiter.removeTokens(1, function() {
-            request({
-                uri: 'http://play.esea.net/index.php',
-                qs: {
-                    's': 'league',
-                    'd': 'standings',
-                    'format': 'json'
-                },
-                json: true,
-                jar: jar
-            }, function(err, http, body) {
-                if (err || http.statusCode != 200) {
-                    cb(err || http.statusCode);
-                }
-                else {
-                    if (body.select_division_id) {
-                        cb(null, body);
+        if (!commander.skipDivisions) {
+            ratelimiter.removeTokens(1, function() {
+                request({
+                    uri: 'http://play.esea.net/index.php',
+                    qs: {
+                        's': 'league',
+                        'd': 'standings',
+                        'format': 'json'
+                    },
+                    json: true,
+                    jar: jar
+                }, function(err, http, body) {
+                    if (err || http.statusCode != 200) {
+                        cb(err || http.statusCode);
                     }
                     else {
-                        cb(404);
-                    }
-                }
-            });
-        });
-    },
-    "divisions": ['esea', function(cb, results) {
-        cb(null, underscore.flatten(underscore.map(results.esea.select_division_id, function(season, seasonName) {
-            return underscore.map(season, function(region, regionName) {
-                return underscore.map(region, function(divisionName, division) {
-                    return division;
-                });
-            });
-        })));
-    }],
-    "teams": ['divisions', function(cb, results) {
-        console.log('teams');
-        console.time('teams');
-
-        async.each(results.divisions, function(division, cb) {
-            async.auto({
-                "esea": function(cb) {
-                    ratelimiter.removeTokens(1, function() {
-                        request({
-                            uri: 'http://play.esea.net/index.php',
-                            qs: {
-                                's': 'league',
-                                'd': 'standings',
-                                'division_id': division,
-                                'format': 'json'
-                            },
-                            json: true,
-                            jar: jar
-                        }, function(err, http, body) {
-                            if (err || http.statusCode != 200) {
-                                cb(err || http.statusCode);
-                            }
-                            else {
-                                if (body.division && body.stem_tournaments) {
-                                    cb(null, body);
-                                }
-                                else {
-                                    cb(404);
-                                }
-                            }
-                        });
-                    });
-                },
-                "division": ['esea', function(cb, results) {
-                    cb(null, {
-                        game: results.esea.division.game_id,
-                        season: results.esea.division.season,
-                        series: results.esea.division.stem_seriesid,
-                        event: results.esea.division.stem_eventid,
-                        division: results.esea.division.division_level,
-                        region: results.esea.division.region_id
-                    });
-                }],
-                "teams": ['esea', 'division', function(cb, results) {
-                    async.each(results.esea.stem_tournaments, function(conference, cb) {
-                        if (conference.type == 'regular season') {
-                            var conferenceInfo = underscore.clone(results.division);
-                            conferenceInfo.conference = conference.location;
-
-                            async.each(conference.groups, function(group, cb) {
-                                var groupInfo = underscore.clone(conferenceInfo);
-                                groupInfo.group = group.name;
-
-                                async.each(group.active_teams, function(teamListing, cb) {
-                                    var teamInfo = underscore.clone(groupInfo);
-                                    teamInfo.team = teamListing.id;
-
-                                    database.TeamSeason.findOne(teamInfo, function(err, teamSeason) {
-                                        if (err) {
-                                            cb(err);
-                                        }
-                                        else {
-                                            if (!teamSeason) {
-                                                teamSeason = new database.TeamSeason(this);
-
-                                                teamSeason.save();
-                                            }
-
-                                            teamSeason.name = teamListing.name;
-                                            teamSeason.record.wins = teamListing.match_win;
-                                            teamSeason.record.ties = teamListing.match_tie;
-                                            teamSeason.record.losses = teamListing.match_loss;
-                                            teamSeason.record.percentage = teamListing.match_win_pct;
-                                            teamSeason.record.pointsFor = teamListing.point_win;
-                                            teamSeason.record.pointsAgainst = teamListing.point_loss;
-
-                                            teamSeason.raw.standings = teamListing;
-                                            teamSeason.markModified('raw.standings');
-
-                                            teamSeason.save();
-
-                                            cb();
-                                        }
-                                    }.bind(teamInfo));
-                                }, cb);
-                            }, cb);
+                        if (body.select_division_id) {
+                            cb(null, body);
                         }
                         else {
-                            cb();
+                            cb(404);
                         }
-                    }, cb);
-                }]
-            }, cb);
-        }, function(err) {
-            console.timeEnd('teams');
+                    }
+                });
+            });
+        }
+        else {
+            cb();
+        }
+    },
+    "divisions": ['esea', function(cb, results) {
+        if (!commander.skipDivisions) {
+            cb(null, underscore.flatten(underscore.map(results.esea.select_division_id, function(season, seasonName) {
+                return underscore.map(season, function(region, regionName) {
+                    return underscore.map(region, function(divisionName, division) {
+                        return division;
+                    });
+                });
+            })));
+        }
+        else {
+            cb();
+        }
+    }],
+    "teams": ['divisions', function(cb, results) {
+        if (!commander.skipDivisions) {
+            console.log('teams');
+            console.time('teams');
 
-            cb(err);
-        });
+            async.each(results.divisions, function(division, cb) {
+                async.auto({
+                    "esea": function(cb) {
+                        ratelimiter.removeTokens(1, function() {
+                            request({
+                                uri: 'http://play.esea.net/index.php',
+                                qs: {
+                                    's': 'league',
+                                    'd': 'standings',
+                                    'division_id': division,
+                                    'format': 'json'
+                                },
+                                json: true,
+                                jar: jar
+                            }, function(err, http, body) {
+                                if (err || http.statusCode != 200) {
+                                    cb(err || http.statusCode);
+                                }
+                                else {
+                                    if (body.division && body.stem_tournaments) {
+                                        cb(null, body);
+                                    }
+                                    else {
+                                        cb(404);
+                                    }
+                                }
+                            });
+                        });
+                    },
+                    "division": ['esea', function(cb, results) {
+                        cb(null, {
+                            game: results.esea.division.game_id,
+                            season: results.esea.division.season,
+                            series: results.esea.division.stem_seriesid,
+                            event: results.esea.division.stem_eventid,
+                            division: results.esea.division.division_level,
+                            region: results.esea.division.region_id
+                        });
+                    }],
+                    "teams": ['esea', 'division', function(cb, results) {
+                        async.each(results.esea.stem_tournaments, function(conference, cb) {
+                            if (conference.type == 'regular season') {
+                                var conferenceInfo = underscore.clone(results.division);
+                                conferenceInfo.conference = conference.location;
+
+                                async.each(conference.groups, function(group, cb) {
+                                    var groupInfo = underscore.clone(conferenceInfo);
+                                    groupInfo.group = group.name;
+
+                                    async.each(group.active_teams, function(teamListing, cb) {
+                                        var teamInfo = underscore.clone(groupInfo);
+                                        teamInfo.team = teamListing.id;
+
+                                        database.TeamSeason.findOne(teamInfo, function(err, teamSeason) {
+                                            if (err) {
+                                                cb(err);
+                                            }
+                                            else {
+                                                if (!teamSeason) {
+                                                    teamSeason = new database.TeamSeason(this);
+
+                                                    teamSeason.save();
+                                                }
+
+                                                teamSeason.name = teamListing.name;
+                                                teamSeason.record.wins = teamListing.match_win;
+                                                teamSeason.record.ties = teamListing.match_tie;
+                                                teamSeason.record.losses = teamListing.match_loss;
+                                                teamSeason.record.percentage = teamListing.match_win_pct;
+                                                teamSeason.record.pointsFor = teamListing.point_win;
+                                                teamSeason.record.pointsAgainst = teamListing.point_loss;
+
+                                                teamSeason.raw.standings = teamListing;
+                                                teamSeason.markModified('raw.standings');
+
+                                                teamSeason.save();
+
+                                                cb();
+                                            }
+                                        }.bind(teamInfo));
+                                    }, cb);
+                                }, cb);
+                            }
+                            else {
+                                cb();
+                            }
+                        }, cb);
+                    }]
+                }, cb);
+            }, function(err) {
+                console.timeEnd('teams');
+
+                cb(err);
+            });
+        }
+        else {
+            cb();
+        }
     }],
     "teamHistory": ['teams', function(cb, results) {
         console.log('teamHistory');

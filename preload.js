@@ -264,6 +264,8 @@ async.auto({
                                             player: this.id
                                         });
 
+                                        playerDoc.alias = this.alias;
+
                                         playerDoc.save();
                                     }
 

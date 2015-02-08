@@ -156,31 +156,36 @@ async.auto({
             }
             else {
                 async.each(teamSeasons, function(teamSeason, cb) {
-                    ratelimiter.removeTokens(1, function() {
-                        request({
-                            uri: 'http://play.esea.net/teams/' + teamSeason.team,
-                            qs: {
-                                'tab': 'league',
-                                'period[type]': 'seasons',
-                                'period[season_start]': teamSeason.series,
-                                'format': 'json'
-                            },
-                            json: true,
-                            jar: jar
-                        }, function(err, http, body) {
-                            if (err || http.statusCode != 200) {
-                                cb(err || http.statusCode);
-                            }
-                            else {
-                                teamSeason.raw.history = body;
-                                teamSeason.markModified('raw.history');
+                    if (!teamSeason.raw.history) {
+                        ratelimiter.removeTokens(1, function() {
+                            request({
+                                uri: 'http://play.esea.net/teams/' + teamSeason.team,
+                                qs: {
+                                    'tab': 'league',
+                                    'period[type]': 'seasons',
+                                    'period[season_start]': teamSeason.series,
+                                    'format': 'json'
+                                },
+                                json: true,
+                                jar: jar
+                            }, function(err, http, body) {
+                                if (err || http.statusCode != 200) {
+                                    cb(err || http.statusCode);
+                                }
+                                else {
+                                    teamSeason.raw.history = body;
+                                    teamSeason.markModified('raw.history');
 
-                                teamSeason.save();
+                                    teamSeason.save();
 
-                                cb();
-                            }
+                                    cb();
+                                }
+                            });
                         });
-                    });
+                    }
+                    else {
+                        cb();
+                    }
                 }, function(err) {
                     console.timeEnd('teamHistory');
 
@@ -299,42 +304,47 @@ async.auto({
             }
             else {
                 async.each(players, function(player, cb) {
-                    ratelimiter.removeTokens(1, function() {
-                        request({
-                            uri: 'http://play.esea.net/users/' + player.player,
-                            qs: {
-                                'tab': 'history',
-                                'format': 'json'
-                            },
-                            json: true,
-                            jar: jar
-                        }, function(err, http, body) {
-                            if (err || http.statusCode != 200) {
-                                cb(err || http.statusCode);
-                            }
-                            else {
-                                player.raw.history = body;
-                                player.markModified('raw.history');
+                    if (!player.raw.history) {
+                        ratelimiter.removeTokens(1, function() {
+                            request({
+                                uri: 'http://play.esea.net/users/' + player.player,
+                                qs: {
+                                    'tab': 'history',
+                                    'format': 'json'
+                                },
+                                json: true,
+                                jar: jar
+                            }, function(err, http, body) {
+                                if (err || http.statusCode != 200) {
+                                    cb(err || http.statusCode);
+                                }
+                                else {
+                                    player.raw.history = body;
+                                    player.markModified('raw.history');
 
-                                player.teams = underscore.map(player.raw.history.history_teams, function(teamSeason) {
-                                    return {
-                                        id: teamSeason.id,
-                                        name: teamSeason.name,
-                                        game: teamSeason.game_id,
-                                        season: teamSeason.season,
-                                        series: teamSeason.stem_seriesid,
-                                        event: teamSeason.stem_eventid,
-                                        division: teamSeason.division_level,
-                                        matches: underscore.keys(teamSeason.matches)
-                                    };
-                                });
+                                    player.teams = underscore.map(player.raw.history.history_teams, function(teamSeason) {
+                                        return {
+                                            id: teamSeason.id,
+                                            name: teamSeason.name,
+                                            game: teamSeason.game_id,
+                                            season: teamSeason.season,
+                                            series: teamSeason.stem_seriesid,
+                                            event: teamSeason.stem_eventid,
+                                            division: teamSeason.division_level,
+                                            matches: underscore.keys(teamSeason.matches)
+                                        };
+                                    });
 
-                                player.save();
+                                    player.save();
 
-                                cb();
-                            }
+                                    cb();
+                                }
+                            });
                         });
-                    });
+                    }
+                    else {
+                        cb();
+                    }
                 }, function(err) {
                     console.timeEnd('playerHistory');
 

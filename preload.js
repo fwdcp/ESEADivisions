@@ -48,6 +48,7 @@ async.auto({
         })));
     }],
     "teams": ['divisions', function(cb, results) {
+        console.log('teams');
         console.time('teams');
 
         async.each(results.divisions, function(division, cb) {
@@ -146,6 +147,7 @@ async.auto({
         });
     }],
     "teamHistory": ['teams', function(cb, results) {
+        console.log('teamHistory');
         console.time('teamHistory');
 
         database.TeamSeason.find({}, 'team series', function(err, teamSeasons) {
@@ -188,6 +190,7 @@ async.auto({
         });
     }],
     "matches": ['teamHistory', function(cb, results) {
+        console.log('matches');
         console.time('matches');
 
         database.TeamSeason.find({}, 'team raw.history', function(err, teamSeasons) {
@@ -244,6 +247,7 @@ async.auto({
         });
     }],
     "players": ['teamHistory', function(cb, results) {
+        console.log('players');
         console.time('players');
 
         database.TeamSeason.find({}, 'team raw.history', function(err, teamSeasons) {
@@ -286,6 +290,7 @@ async.auto({
         });
     }],
     "playerHistory": ['players', function(cb, results) {
+        console.log('playerHistory');
         console.time('playerHistory');
 
         database.Player.find({}, 'player', function(err, players) {
@@ -339,6 +344,7 @@ async.auto({
         });
     }],
     "experienceRatings": ['playerHistory', 'matches', 'teamHistory', function(cb, results) {
+        console.log('experienceRatings');
         console.time('experienceRatings');
 
         database.TeamSeason.find({}, 'team game season series event division', function(err, teamSeasons) {
@@ -417,6 +423,7 @@ async.auto({
         });
     }],
     "scheduleStrengths": ['teamMatches', 'experienceRating', function(cb, results) {
+        console.log('scheduleStrengths');
         console.time('scheduleStrengths');
 
         database.TeamSeason.find({}, 'record matches', function(err, teamSeasons) {

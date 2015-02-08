@@ -1,5 +1,3 @@
-require('v8-profiler');
-
 var request = require('request');
 var underscore = require('underscore');
 var async = require('async');

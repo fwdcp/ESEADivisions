@@ -1,3 +1,5 @@
+require('v8-profiler');
+
 var request = require('request');
 var underscore = require('underscore');
 var async = require('async');
@@ -14,12 +16,13 @@ var ratelimiter = new limiter.RateLimiter(1, 'second');
 
 commander
     .version('0.1.0')
-    .option('--skip-divisions', 'skip retrieving teams from divisions')
+    .option('--skip-division-teams', 'skip retrieving teams from divisions')
+    .option('--skip-team-players', 'skip retrieving players from teams')
     .parse(process.argv);
 
 async.auto({
     "esea": function(cb) {
-        if (!commander.skipDivisions) {
+        if (!commander.skipDivisionTeams) {
             ratelimiter.removeTokens(1, function() {
                 request({
                     uri: 'http://play.esea.net/index.php',
@@ -50,7 +53,7 @@ async.auto({
         }
     },
     "divisions": ['esea', function(cb, results) {
-        if (!commander.skipDivisions) {
+        if (!commander.skipDivisionTeams) {
             cb(null, underscore.flatten(underscore.map(results.esea.select_division_id, function(season, seasonName) {
                 return underscore.map(season, function(region, regionName) {
                     return underscore.map(region, function(divisionName, division) {
@@ -64,7 +67,7 @@ async.auto({
         }
     }],
     "teams": ['divisions', function(cb, results) {
-        if (!commander.skipDivisions) {
+        if (!commander.skipDivisionTeams) {
             console.log('teams');
             console.time('teams');
 
@@ -128,8 +131,6 @@ async.auto({
                                             else {
                                                 if (!teamSeason) {
                                                     teamSeason = new database.TeamSeason(this);
-
-                                                    teamSeason.save();
                                                 }
 
                                                 teamSeason.name = teamListing.name;
@@ -143,9 +144,7 @@ async.auto({
                                                 teamSeason.raw.standings = teamListing;
                                                 teamSeason.markModified('raw.standings');
 
-                                                teamSeason.save();
-
-                                                cb();
+                                                teamSeason.save(cb);
                                             }
                                         }.bind(teamInfo));
                                     }, cb);
@@ -171,7 +170,7 @@ async.auto({
         console.log('teamHistory');
         console.time('teamHistory');
 
-        database.TeamSeason.find({'raw.history': {$exists: false}}, 'team series', function(err, teamSeasons) {
+        database.TeamSeason.find({'raw.history': {$exists: false}}, {'team': 1, 'series': 1}, function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -197,9 +196,7 @@ async.auto({
                                     teamSeason.raw.history = body;
                                     teamSeason.markModified('raw.history');
 
-                                    teamSeason.save();
-
-                                    cb();
+                                    teamSeason.save(cb);
                                 }
                             });
                         });
@@ -219,14 +216,14 @@ async.auto({
         console.log('matches');
         console.time('matches');
 
-        database.TeamSeason.find({'raw.history': {$exists: true}}, 'team raw.history', function(err, teamSeasons) {
+        database.TeamSeason.find({'raw.history': {$exists: true}, matches: {$size: 0}}, {'team': 1, 'raw.history.team_matches': 1}, function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
             else {
                 async.each(teamSeasons, function(teamSeason, cb) {
                     if (teamSeason.raw.history.team_matches) {
-                        teamSeason.matches = underscore.map(underscore.values(teamSeason.raw.history.team_matches), function(match) {
+                        teamSeason.matches = underscore.map(teamSeason.raw.history.team_matches, function(match) {
                             var matchInfo = {
                                 id: match.id,
                                 startTime: new Date(match.time_start * 1000),
@@ -261,9 +258,7 @@ async.auto({
                         teamSeason.matches = [];
                     }
 
-                    teamSeason.save();
-
-                    cb();
+                    teamSeason.save(cb);
                 }, function(err) {
                     console.timeEnd('matches');
 
@@ -273,53 +268,59 @@ async.auto({
         });
     }],
     "players": ['teamHistory', function(cb, results) {
-        console.log('players');
-        console.time('players');
+        if (!commander.skipTeamPlayers) {
+            console.log('players');
+            console.time('players');
 
-        database.TeamSeason.find({'raw.history': {$exists: true}}, 'team raw.history', function(err, teamSeasons) {
-            if (err) {
-                cb(err);
-            }
-            else {
-                async.each(teamSeasons, function(teamSeason, cb) {
-                    if (teamSeason.raw.history.team_roster) {
-                        async.each(teamSeason.raw.history.team_roster, function(player, cb) {
-                            database.Player.findOne({player: player.id}, function(err, playerDoc) {
-                                if (err) {
-                                    cb(err);
-                                }
-                                else {
-                                    if (!playerDoc) {
-                                        playerDoc = new database.Player({
-                                            player: this.id
-                                        });
-
-                                        playerDoc.alias = this.alias;
-
-                                        playerDoc.save();
-                                    }
-
-                                    cb();
-                                }
-                            }.bind(player));
-                        }, cb);
-                    }
-                    else {
-                        cb();
-                    }
-                }, function(err) {
-                    console.timeEnd('players');
-
+            database.TeamSeason.find({'raw.history': {$exists: true}}, {'team': 1, 'raw.history.team_roster': 1}, function(err, teamSeasons) {
+                if (err) {
                     cb(err);
-                });
-            }
-        });
+                }
+                else {
+                    async.each(teamSeasons, function(teamSeason, cb) {
+                        if (teamSeason.raw.history.team_roster) {
+                            async.each(teamSeason.raw.history.team_roster, function(player, cb) {
+                                database.Player.findOne({player: player.id}, function(err, playerDoc) {
+                                    if (err) {
+                                        cb(err);
+                                    }
+                                    else {
+                                        if (!playerDoc) {
+                                            playerDoc = new database.Player({
+                                                player: this.id
+                                            });
+
+                                            playerDoc.alias = this.alias;
+
+                                            playerDoc.save(cb);
+                                        }
+                                        else {
+                                            cb();
+                                        }
+                                    }
+                                }.bind(player));
+                            }, cb);
+                        }
+                        else {
+                            cb();
+                        }
+                    }, function(err) {
+                        console.timeEnd('players');
+
+                        cb(err);
+                    });
+                }
+            });
+        }
+        else {
+            cb();
+        }
     }],
     "playerHistory": ['players', function(cb, results) {
         console.log('playerHistory');
         console.time('playerHistory');
 
-        database.Player.find({'raw.history': {$exists: false}}, 'player', function(err, players) {
+        database.Player.find({'raw.history': {$exists: false}}, {'player': 1}, function(err, players) {
             if (err) {
                 cb(err);
             }
@@ -356,9 +357,7 @@ async.auto({
                                         };
                                     });
 
-                                    player.save();
-
-                                    cb();
+                                    player.save(cb);
                                 }
                             });
                         });
@@ -378,7 +377,7 @@ async.auto({
         console.log('experienceRatings');
         console.time('experienceRatings');
 
-        database.TeamSeason.find({}, 'team game season series event division', function(err, teamSeasons) {
+        database.TeamSeason.find({}, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1}, function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -440,9 +439,7 @@ async.auto({
                                 teamSeason.experienceRating = 0;
                             }
 
-                            teamSeason.save();
-
-                            cb();
+                            teamSeason.save(cb);
                         }
                     });
                 }, function(err) {
@@ -457,7 +454,7 @@ async.auto({
         console.log('scheduleStrengths');
         console.time('scheduleStrengths');
 
-        database.TeamSeason.find({}, 'record matches', function(err, teamSeasons) {
+        database.TeamSeason.find({}, {'record': 1, 'matches': 1}, function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -483,10 +480,7 @@ async.auto({
                         },
                         'opposingTeamStrengths': ['regularSeasonMatches', function(cb, results) {
                             async.map(results.regularSeasonMatches, function(match) {
-                                database.TeamSeason.findOne({
-                                    season: teamSeason.season,
-                                    team: match.opposingTeam
-                                }, 'record experienceRating', function(err, teamSeason) {
+                                database.TeamSeason.findOne({season: teamSeason.season, team: match.opposingTeam}, {'record': 1, 'experienceRating': 1}, function(err, teamSeason) {
                                     if (err) {
                                         cb(err);
                                     }
@@ -538,9 +532,7 @@ async.auto({
                                 experienceRating: 0
                             });
 
-                            teamSeason.save();
-
-                            cb();
+                            teamSeason.save(cb);
                         }
                     });
                 }, function(err) {

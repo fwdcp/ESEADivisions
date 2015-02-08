@@ -17,7 +17,9 @@ var ratelimiter = new limiter.RateLimiter(1, 'second');
 commander
     .version('0.1.0')
     .option('--skip-division-teams', 'skip retrieving teams from divisions')
+    .option('--skip-team-history', 'skip updating team history')
     .option('--skip-team-players', 'skip retrieving players from teams')
+    .option('--skip-player-history', 'skip updating team history')
     .parse(process.argv);
 
 async.auto({
@@ -167,105 +169,91 @@ async.auto({
         }
     }],
     "teamHistory": ['teams', function(cb, results) {
-        console.log('teamHistory');
-        console.time('teamHistory');
+        if (!commander.skipTeamHistory) {
+            console.log('teamHistory');
+            console.time('teamHistory');
 
-        database.TeamSeason.find({'raw.history': {$exists: false}}, {'team': 1, 'series': 1}, function(err, teamSeasons) {
-            if (err) {
-                cb(err);
-            }
-            else {
-                async.each(teamSeasons, function(teamSeason, cb) {
-                    if (!teamSeason.raw.history) {
-                        ratelimiter.removeTokens(1, function() {
-                            request({
-                                uri: 'http://play.esea.net/teams/' + teamSeason.team,
-                                qs: {
-                                    'tab': 'league',
-                                    'period[type]': 'seasons',
-                                    'period[season_start]': teamSeason.series,
-                                    'format': 'json'
-                                },
-                                json: true,
-                                jar: jar
-                            }, function(err, http, body) {
-                                if (err || http.statusCode != 200) {
-                                    cb(err || http.statusCode);
-                                }
-                                else {
-                                    teamSeason.raw.history = body;
-                                    teamSeason.markModified('raw.history');
+            database.TeamSeason.find({'raw.history': {$exists: false}}, {'team': 1, 'series': 1, 'raw.history': 1}, function(err, teamSeasons) {
+                if (err) {
+                    cb(err);
+                }
+                else {
+                    async.each(teamSeasons, function(teamSeason, cb) {
+                        if (!teamSeason.raw.history) {
+                            ratelimiter.removeTokens(1, function() {
+                                request({
+                                    uri: 'http://play.esea.net/teams/' + teamSeason.team,
+                                    qs: {
+                                        'tab': 'league',
+                                        'period[type]': 'seasons',
+                                        'period[season_start]': teamSeason.series,
+                                        'format': 'json'
+                                    },
+                                    json: true,
+                                    jar: jar
+                                }, function(err, http, body) {
+                                    if (err || http.statusCode != 200) {
+                                        cb(err || http.statusCode);
+                                    }
+                                    else {
+                                        teamSeason.raw.history = body;
+                                        teamSeason.markModified('raw.history');
 
-                                    teamSeason.save(cb);
-                                }
+                                        if (teamSeason.raw.history.team_matches) {
+                                            teamSeason.matches = underscore.map(teamSeason.raw.history.team_matches, function(match) {
+                                                var matchInfo = {
+                                                    id: match.id,
+                                                    startTime: new Date(match.time_start * 1000),
+                                                    endTime: new Date(match.time_end * 1000),
+                                                    status: match.state,
+                                                    outcomeType: match.outcome_type,
+                                                    atFault: match.outcome_team_at_fault == teamSeason.team,
+                                                    gamesPlayed: match.games,
+                                                    map: match.games > 1 ? null : match.map_name,
+                                                    result: match.result
+                                                };
+
+                                                if (match.entities[1].id == teamSeason.team) {
+                                                    matchInfo.opposingTeam = match.entities[2].id;
+                                                    matchInfo.gamesFor = match.team_1_games;
+                                                    matchInfo.gamesAgainst = match.team_2_games;
+                                                    matchInfo.pointsFor = match.team_1_points;
+                                                    matchInfo.pointsAgainst = match.team_2_points;
+                                                }
+                                                else if (match.entities[2].id == teamSeason.team) {
+                                                    matchInfo.opposingTeam = match.entities[1].id;
+                                                    matchInfo.gamesFor = match.team_2_games;
+                                                    matchInfo.gamesAgainst = match.team_1_games;
+                                                    matchInfo.pointsFor = match.team_2_points;
+                                                    matchInfo.pointsAgainst = match.team_1_points;
+                                                }
+
+                                                return matchInfo;
+                                            });
+                                        }
+                                        else {
+                                            teamSeason.matches = [];
+                                        }
+
+                                        teamSeason.save(cb);
+                                    }
+                                });
                             });
-                        });
-                    }
-                    else {
-                        cb();
-                    }
-                }, function(err) {
-                    console.timeEnd('teamHistory');
+                        }
+                        else {
+                            cb();
+                        }
+                    }, function(err) {
+                        console.timeEnd('teamHistory');
 
-                    cb(err);
-                });
-            }
-        });
-    }],
-    "matches": ['teamHistory', function(cb, results) {
-        console.log('matches');
-        console.time('matches');
-
-        database.TeamSeason.find({'raw.history': {$exists: true}, matches: {$size: 0}}, {'team': 1, 'raw.history.team_matches': 1}, function(err, teamSeasons) {
-            if (err) {
-                cb(err);
-            }
-            else {
-                async.each(teamSeasons, function(teamSeason, cb) {
-                    if (teamSeason.raw.history.team_matches) {
-                        teamSeason.matches = underscore.map(teamSeason.raw.history.team_matches, function(match) {
-                            var matchInfo = {
-                                id: match.id,
-                                startTime: new Date(match.time_start * 1000),
-                                endTime: new Date(match.time_end * 1000),
-                                status: match.state,
-                                outcomeType: match.outcome_type,
-                                atFault: match.outcome_team_at_fault == teamSeason.team,
-                                gamesPlayed: match.games,
-                                map: match.games > 1 ? null : match.map_name,
-                                result: match.result
-                            };
-
-                            if (match.entities[1].id == teamSeason.team) {
-                                matchInfo.opposingTeam = match.entities[2].id;
-                                matchInfo.gamesFor = match.team_1_games;
-                                matchInfo.gamesAgainst = match.team_2_games;
-                                matchInfo.pointsFor = match.team_1_points;
-                                matchInfo.pointsAgainst = match.team_2_points;
-                            }
-                            else if (match.entities[2].id == teamSeason.team) {
-                                matchInfo.opposingTeam = match.entities[1].id;
-                                matchInfo.gamesFor = match.team_2_games;
-                                matchInfo.gamesAgainst = match.team_1_games;
-                                matchInfo.pointsFor = match.team_2_points;
-                                matchInfo.pointsAgainst = match.team_1_points;
-                            }
-
-                            return matchInfo;
-                        });
-                    }
-                    else {
-                        teamSeason.matches = [];
-                    }
-
-                    teamSeason.save(cb);
-                }, function(err) {
-                    console.timeEnd('matches');
-
-                    cb(err);
-                });
-            }
-        });
+                        cb(err);
+                    });
+                }
+            });
+        }
+        else {
+            cb();
+        }
     }],
     "players": ['teamHistory', function(cb, results) {
         if (!commander.skipTeamPlayers) {
@@ -280,7 +268,7 @@ async.auto({
                     async.each(teamSeasons, function(teamSeason, cb) {
                         if (teamSeason.raw.history.team_roster) {
                             async.each(teamSeason.raw.history.team_roster, function(player, cb) {
-                                database.Player.findOne({player: player.id}, function(err, playerDoc) {
+                                database.Player.findOne({player: player.id}, {'player': 1, 'alias': 1}, function(err, playerDoc) {
                                     if (err) {
                                         cb(err);
                                     }
@@ -317,67 +305,72 @@ async.auto({
         }
     }],
     "playerHistory": ['players', function(cb, results) {
-        console.log('playerHistory');
-        console.time('playerHistory');
+        if (!commander.skipPlayerHistory) {
+            console.log('playerHistory');
+            console.time('playerHistory');
 
-        database.Player.find({'raw.history': {$exists: false}}, {'player': 1}, function(err, players) {
-            if (err) {
-                cb(err);
-            }
-            else {
-                async.each(players, function(player, cb) {
-                    if (!player.raw.history) {
-                        ratelimiter.removeTokens(1, function() {
-                            request({
-                                uri: 'http://play.esea.net/users/' + player.player,
-                                qs: {
-                                    'tab': 'history',
-                                    'format': 'json'
-                                },
-                                json: true,
-                                jar: jar
-                            }, function(err, http, body) {
-                                if (err || http.statusCode != 200) {
-                                    cb(err || http.statusCode);
-                                }
-                                else {
-                                    player.raw.history = body;
-                                    player.markModified('raw.history');
-
-                                    player.teams = underscore.map(player.raw.history.history_teams, function(teamSeason) {
-                                        return {
-                                            id: teamSeason.id,
-                                            name: teamSeason.name,
-                                            game: teamSeason.game_id,
-                                            season: teamSeason.season,
-                                            series: teamSeason.stem_seriesid,
-                                            event: teamSeason.stem_eventid,
-                                            division: teamSeason.division_level,
-                                            matches: underscore.keys(teamSeason.matches)
-                                        };
-                                    });
-
-                                    player.save(cb);
-                                }
-                            });
-                        });
-                    }
-                    else {
-                        cb();
-                    }
-                }, function(err) {
-                    console.timeEnd('playerHistory');
-
+            database.Player.find({'raw.history': {$exists: false}}, {'player': 1, 'raw.history': 1}, function(err, players) {
+                if (err) {
                     cb(err);
-                });
-            }
-        });
+                }
+                else {
+                    async.each(players, function(player, cb) {
+                        if (!player.raw.history) {
+                            ratelimiter.removeTokens(1, function() {
+                                request({
+                                    uri: 'http://play.esea.net/users/' + player.player,
+                                    qs: {
+                                        'tab': 'history',
+                                        'format': 'json'
+                                    },
+                                    json: true,
+                                    jar: jar
+                                }, function(err, http, body) {
+                                    if (err || http.statusCode != 200) {
+                                        cb(err || http.statusCode);
+                                    }
+                                    else {
+                                        player.raw.history = body;
+                                        player.markModified('raw.history');
+
+                                        player.teams = underscore.map(player.raw.history.history_teams, function(teamSeason) {
+                                            return {
+                                                id: teamSeason.id,
+                                                name: teamSeason.name,
+                                                game: teamSeason.game_id,
+                                                season: teamSeason.season,
+                                                series: teamSeason.stem_seriesid,
+                                                event: teamSeason.stem_eventid,
+                                                division: teamSeason.division_level,
+                                                matches: underscore.keys(teamSeason.matches)
+                                            };
+                                        });
+
+                                        player.save(cb);
+                                    }
+                                });
+                            });
+                        }
+                        else {
+                            cb();
+                        }
+                    }, function(err) {
+                        console.timeEnd('playerHistory');
+
+                        cb(err);
+                    });
+                }
+            });
+        }
+        else {
+            cb();
+        }
     }],
-    "experienceRatings": ['playerHistory', 'matches', 'teamHistory', function(cb, results) {
+    "experienceRatings": ['playerHistory', 'teamHistory', function(cb, results) {
         console.log('experienceRatings');
         console.time('experienceRatings');
 
-        database.TeamSeason.find({}, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1}, function(err, teamSeasons) {
+        database.TeamSeason.find({}, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1, 'experienceRating': 1}, function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -454,7 +447,7 @@ async.auto({
         console.log('scheduleStrengths');
         console.time('scheduleStrengths');
 
-        database.TeamSeason.find({}, {'record': 1, 'matches': 1}, function(err, teamSeasons) {
+        database.TeamSeason.find({}, {'record': 1, 'matches': 1, 'scheduleStrength': 1}, function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }

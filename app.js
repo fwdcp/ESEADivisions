@@ -177,7 +177,7 @@ express.get('/divisions/:id.json', function(req, res) {
         "teamMatches": ['teamsHistory', function(cb, results) {
             async.map(results.teamsHistory, function(teamSeason, cb) {
                 if (teamSeason.raw.history.team_matches) {
-                    async.map(underscore.values(teamSeason.raw.history.team_matches), function(match, cb) {
+                    async.mapSeries(underscore.values(teamSeason.raw.history.team_matches), function(match, cb) {
                         var matchInfo = {
                             id: match.id,
                             startTime: new Date(match.time_start * 1000),

@@ -150,7 +150,7 @@ async.auto({
         console.log('teamHistory');
         console.time('teamHistory');
 
-        database.TeamSeason.find({}, 'team series', function(err, teamSeasons) {
+        database.TeamSeason.find({'raw.history': {$exists: false}}, 'team series', function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -198,7 +198,7 @@ async.auto({
         console.log('matches');
         console.time('matches');
 
-        database.TeamSeason.find({}, 'team raw.history', function(err, teamSeasons) {
+        database.TeamSeason.find({'raw.history': {$exists: true}}, 'team raw.history', function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -255,7 +255,7 @@ async.auto({
         console.log('players');
         console.time('players');
 
-        database.TeamSeason.find({}, 'team raw.history', function(err, teamSeasons) {
+        database.TeamSeason.find({'raw.history': {$exists: true}}, 'team raw.history', function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -298,7 +298,7 @@ async.auto({
         console.log('playerHistory');
         console.time('playerHistory');
 
-        database.Player.find({}, 'player', function(err, players) {
+        database.Player.find({'raw.history': {$exists: false}}, 'player', function(err, players) {
             if (err) {
                 cb(err);
             }

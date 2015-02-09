@@ -112,8 +112,6 @@ express.get('/divisions/:id.json', function(req, res) {
                                 else {
                                     if (!teamSeason) {
                                         teamSeason = new database.TeamSeason(this);
-
-                                        teamSeason.save();
                                     }
 
                                     if (!underscore.isEqual(teamSeason.raw.standings, teamListing)) {
@@ -128,9 +126,7 @@ express.get('/divisions/:id.json', function(req, res) {
                                         teamSeason.raw.standings = teamListing;
                                         teamSeason.markModified('raw.standings');
 
-                                        teamSeason.save();
-
-                                        cb(null, teamSeason);
+                                        teamSeason.save(cb);
                                     }
                                     else {
                                         cb();
@@ -167,9 +163,7 @@ express.get('/divisions/:id.json', function(req, res) {
                         teamSeason.raw.history = body;
                         teamSeason.markModified('raw.history');
 
-                        teamSeason.save();
-
-                        cb(null, teamSeason);
+                        teamSeason.save(cb);
                     }
                 });
             }, cb);
@@ -213,18 +207,14 @@ express.get('/divisions/:id.json', function(req, res) {
                         else {
                             teamSeason.matches = results;
 
-                            teamSeason.save();
-
-                            cb(null, teamSeason);
+                            teamSeason.save(cb);
                         }
                     });
                 }
                 else {
                     teamSeason.matches = [];
 
-                    teamSeason.save();
-
-                    cb(null, teamSeason);
+                    teamSeason.save(cb);
                 }
             }, cb);
         }],
@@ -238,18 +228,12 @@ express.get('/divisions/:id.json', function(req, res) {
                             }
                             else {
                                 if (!playerDoc) {
-                                    playerDoc = new database.Player({
-                                        player: this.id
-                                    });
-
-                                    playerDoc.save();
+                                    playerDoc = new database.Player({player: this.id});
                                 }
 
                                 playerDoc.alias = this.alias;
 
-                                playerDoc.save();
-
-                                cb(null, playerDoc);
+                                playerDoc.save(cb);
                             }
                         }.bind(player));
                     }, cb);
@@ -279,8 +263,6 @@ express.get('/divisions/:id.json', function(req, res) {
                         player.raw.history = body;
                         player.markModified('raw.history');
 
-                        player.save();
-
                         async.map(player.raw.history.history_teams, function(teamSeason, cb) {
                             cb(null, {
                                 id: teamSeason.id,
@@ -299,9 +281,7 @@ express.get('/divisions/:id.json', function(req, res) {
                             else {
                                 player.teams = results;
 
-                                player.save();
-
-                                cb(null, player);
+                                player.save(cb);
                             }
                         });
                     }
@@ -459,9 +439,7 @@ express.get('/divisions/:id.json', function(req, res) {
                             teamSeason.experienceRating = 0;
                         }
 
-                        teamSeason.save();
-
-                        cb(null, teamSeason);
+                        teamSeason.save(cb);
                     }
                 });
             }, cb);
@@ -545,9 +523,7 @@ express.get('/divisions/:id.json', function(req, res) {
                             experienceRating: 0
                         });
 
-                        teamSeason.save();
-
-                        cb(null, teamSeason);
+                        teamSeason.save(cb);
                     }
                 });
             }, cb);

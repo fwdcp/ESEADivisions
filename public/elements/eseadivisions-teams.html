@@ -5,7 +5,7 @@
     <template>
         <div id="container">
             <template repeat="{{group in teams}}">
-                <sortable-table class="default" rowTemplate="rowTemplate" sortColumn="percentage">
+                <sortable-table class="default" rowTemplate="rowTemplate" sortColumn="percentage" sortDescending="1">
                     <sortable-column name="name">Team</sortable-column>
                     <sortable-column name="wins" formula="function(row) { return +row.record.wins; }"><abbr title="Wins">W</abbr></sortable-column>
                     <sortable-column name="losses" formula="function(row) { return +row.record.losses; }"><abbr title="Losses">L</abbr></sortable-column>

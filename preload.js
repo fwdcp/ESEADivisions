@@ -10,7 +10,7 @@ var database = require('./database');
 var jar = request.jar();
 jar.setCookie(request.cookie('viewed_welcome_page=1'), 'http://play.esea.net');
 
-var ratelimiter = new limiter.RateLimiter(1, 'second');
+var ratelimiter = new limiter.RateLimiter(10, 'second');
 
 commander
     .version('0.1.0')
@@ -19,6 +19,14 @@ commander
     .option('--skip-team-players', 'skip retrieving players from teams')
     .option('--skip-player-history', 'skip updating team history')
     .parse(process.argv);
+
+var queryQueue = async.queue(function(query, cb) {
+    query.exec(cb);
+}, 10);
+
+var saveQueue = async.queue(function(doc, cb) {
+    doc.save(cb);
+}, 10);
 
 async.auto({
     "esea": function(cb) {
@@ -124,13 +132,13 @@ async.auto({
                                         var teamInfo = underscore.clone(groupInfo);
                                         teamInfo.team = teamListing.id;
 
-                                        database.TeamSeason.findOne(teamInfo, function(err, teamSeason) {
+                                        queryQueue.push(database.TeamSeason.findOne(teamInfo), function(err, teamSeason) {
                                             if (err) {
                                                 cb(err);
                                             }
                                             else {
                                                 if (!teamSeason) {
-                                                    teamSeason = new database.TeamSeason(this);
+                                                    teamSeason = new database.TeamSeason(teamInfo);
                                                 }
 
                                                 teamSeason.name = teamListing.name;
@@ -144,9 +152,9 @@ async.auto({
                                                 teamSeason.raw.standings = teamListing;
                                                 teamSeason.markModified('raw.standings');
 
-                                                teamSeason.save(cb);
+                                                saveQueue.push(teamSeason, cb);
                                             }
-                                        }.bind(teamInfo));
+                                        });
                                     }, cb);
                                 }, cb);
                             }
@@ -171,7 +179,7 @@ async.auto({
             console.log('teamHistory');
             console.time('teamHistory');
 
-            database.TeamSeason.find({'raw.history': {$exists: false}}, {'team': 1, 'series': 1, 'raw.history': 1}, function(err, teamSeasons) {
+            queryQueue.push(database.TeamSeason.find({'raw.history': {$exists: false}}, {'team': 1, 'series': 1, 'raw.history': 1}), function(err, teamSeasons) {
                 if (err) {
                     cb(err);
                 }
@@ -233,7 +241,7 @@ async.auto({
                                             teamSeason.matches = [];
                                         }
 
-                                        teamSeason.save(cb);
+                                        saveQueue.push(teamSeason, cb);
                                     }
                                 });
                             });
@@ -258,33 +266,35 @@ async.auto({
             console.log('players');
             console.time('players');
 
-            database.TeamSeason.find({'raw.history': {$exists: true}}, {'team': 1, 'raw.history.team_roster': 1}, function(err, teamSeasons) {
+            queryQueue.push(database.TeamSeason.find({'raw.history': {$exists: true}}, {'team': 1, 'raw.history.team_roster': 1}), function(err, teamSeasons) {
                 if (err) {
                     cb(err);
                 }
                 else {
+                    console.log(teamSeasons.length);
+
                     async.each(teamSeasons, function(teamSeason, cb) {
                         if (teamSeason.raw.history.team_roster) {
                             async.each(teamSeason.raw.history.team_roster, function(player, cb) {
-                                database.Player.findOne({player: player.id}, {'player': 1, 'alias': 1}, function(err, playerDoc) {
+                                queryQueue.push(database.Player.findOne({player: player.id}, {'player': 1, 'alias': 1}), function(err, playerDoc) {
                                     if (err) {
                                         cb(err);
                                     }
                                     else {
                                         if (!playerDoc) {
                                             playerDoc = new database.Player({
-                                                player: this.id
+                                                player: player.id
                                             });
 
-                                            playerDoc.alias = this.alias;
+                                            playerDoc.alias = player.alias;
 
-                                            playerDoc.save(cb);
+                                            saveQueue.push(playerDoc, cb);
                                         }
                                         else {
                                             cb();
                                         }
                                     }
-                                }.bind(player));
+                                });
                             }, cb);
                         }
                         else {
@@ -307,7 +317,7 @@ async.auto({
             console.log('playerHistory');
             console.time('playerHistory');
 
-            database.Player.find({'raw.history': {$exists: false}}, {'player': 1, 'raw.history': 1}, function(err, players) {
+            queryQueue.push(database.Player.find({'raw.history': {$exists: false}}, {'player': 1, 'raw.history': 1}), function(err, players) {
                 if (err) {
                     cb(err);
                 }
@@ -344,7 +354,7 @@ async.auto({
                                             };
                                         });
 
-                                        player.save(cb);
+                                        saveQueue.push(player, cb);
                                     }
                                 });
                             });
@@ -368,7 +378,7 @@ async.auto({
         console.log('experienceRatings');
         console.time('experienceRatings');
 
-        database.TeamSeason.find({}, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1, 'experienceRating': 1}, function(err, teamSeasons) {
+        queryQueue.push(database.TeamSeason.find({experienceRating: {$exists: false}}, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1, 'experienceRating': 1}), function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -385,12 +395,8 @@ async.auto({
                                 division: teamSeason.division
                             });
                         },
-                        'teamPlayers': ['teamInfo', function(cb) {
-                            database.Player.find({
-                                teams: {
-                                    $elemMatch: results.teamInfo
-                                }
-                            }, cb);
+                        'teamPlayers': ['teamInfo', function(cb, results) {
+                            queryQueue.push(database.Player.find({teams: {$elemMatch: results.teamInfo}}), cb);
                         }],
                         'weightedExperienceRating': ['teamInfo', 'teamPlayers', function(cb, results) {
                             cb(null, underscore.chain(results.teamPlayers).map(function(player) {
@@ -404,7 +410,7 @@ async.auto({
                                 }
                             }).reduce(function(total, player) {
                                 return total + player;
-                            }).value());
+                            }, 0).value());
                         }],
                         'matchesPlayed': ['teamPlayers', function(cb, results) {
                             cb(null, underscore.chain(results.teamPlayers).map(function(player) {
@@ -423,14 +429,14 @@ async.auto({
                             cb(err);
                         }
                         else {
-                            if (results.matchesPlayed.length > 0) {
+                            if (results.matchesPlayed > 0) {
                                 teamSeason.experienceRating = results.weightedExperienceRating / results.matchesPlayed;
                             }
                             else {
                                 teamSeason.experienceRating = 0;
                             }
 
-                            teamSeason.save(cb);
+                            saveQueue.push(teamSeason, cb);
                         }
                     });
                 }, function(err) {
@@ -441,11 +447,11 @@ async.auto({
             }
         });
     }],
-    "scheduleStrengths": ['teamMatches', 'experienceRating', function(cb, results) {
+    "scheduleStrengths": ['teams', 'experienceRatings', function(cb, results) {
         console.log('scheduleStrengths');
         console.time('scheduleStrengths');
 
-        database.TeamSeason.find({}, {'record': 1, 'matches': 1, 'scheduleStrength': 1}, function(err, teamSeasons) {
+        queryQueue.push(database.TeamSeason.find({}, {'season': 1, 'record': 1, 'matches': 1, 'scheduleStrength': 1}), function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -458,20 +464,20 @@ async.auto({
 
                             cb(null, underscore.filter(teamSeason.matches, function(match) {
                                 if (processed >= played) {
-                                    cb(false);
+                                    return false;
                                 }
                                 else if (match.status == 'completed') {
                                     processed++;
-                                    cb(true);
+                                    return true;
                                 }
                                 else {
-                                    cb(false);
+                                    return false;
                                 }
                             }));
                         },
                         'opposingTeamStrengths': ['regularSeasonMatches', function(cb, results) {
-                            async.map(results.regularSeasonMatches, function(match) {
-                                database.TeamSeason.findOne({season: teamSeason.season, team: match.opposingTeam}, {'record': 1, 'experienceRating': 1}, function(err, teamSeason) {
+                            async.map(results.regularSeasonMatches, function(match, cb) {
+                                queryQueue.push(database.TeamSeason.findOne({season: teamSeason.season, team: match.opposingTeam}, {'record': 1, 'experienceRating': 1}), function(err, teamSeason) {
                                     if (err) {
                                         cb(err);
                                     }
@@ -523,7 +529,7 @@ async.auto({
                                 experienceRating: 0
                             });
 
-                            teamSeason.save(cb);
+                            saveQueue.push(teamSeason, cb);
                         }
                     });
                 }, function(err) {
@@ -534,4 +540,6 @@ async.auto({
             }
         });
     }]
+}, function(err, results) {
+    console.log(err);
 });

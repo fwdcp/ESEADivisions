@@ -26,7 +26,7 @@ var playerSchema = new mongoose.Schema({
 
 playerSchema.methods.getExperienceRating = function(game, season) {
     return underscore.reduce(this.teams, function(memo, team) {
-        if (team.game == game && team.season == season) {
+        if (team.game == game && team.season <= season) {
             var multiplier = 1;
 
             if (team.division == 'open') {
@@ -82,6 +82,9 @@ playerSchema.virtual('experienceRating').get(function() {
     }, {});
 });
 
+playerSchema.index({player: 1}, {unique: true});
+playerSchema.index({'teams.id': 1, 'teams.name': 1, 'teams.game': 1, 'teams.season': 1, 'teams.series': 1, 'teams.event': 1, 'teams.division': 1});
+
 var teamSeasonSchema = new mongoose.Schema({
     team: Number,
     name: String,
@@ -132,6 +135,8 @@ var teamSeasonSchema = new mongoose.Schema({
         history: Object
     }
 });
+
+teamSeasonSchema.index({team: 1, game: 1, season: 1, series: 1, event: 1, region: 1, division: 1, conference: 1, group: 1}, {unique: true});
 
 exports.mongoose = mongoose;
 exports.Player = mongoose.model('Player', playerSchema);

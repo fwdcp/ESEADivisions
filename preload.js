@@ -396,8 +396,8 @@ async.auto({
                             cb(null, underscore.chain(results.teamPlayers).map(function(player) {
                                 var season = underscore.findWhere(player.teams, results.teamInfo);
 
-                                if (season && player.experienceRating[teamSeason.game]) {
-                                    return season.matches.length * player.experienceRating[teamSeason.game];
+                                if (season) {
+                                    return season.matches.length * player.getExperienceRating(teamSeason.game, teamSeason.season);
                                 }
                                 else {
                                     return 0;

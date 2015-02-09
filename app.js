@@ -404,8 +404,8 @@ express.get('/divisions/:id.json', function(req, res) {
                                 division: teamSeason.division
                             });
 
-                            if (season && player.experienceRating[teamSeason.game]) {
-                                cb(null, season.matches.length * player.experienceRating[teamSeason.game]);
+                            if (season) {
+                                cb(null, season.matches.length * player.getExperienceRating(teamSeason.game, teamSeason.season));
                             }
                             else {
                                 cb(null, 0);

@@ -24,6 +24,34 @@ var playerSchema = new mongoose.Schema({
     }
 });
 
+playerSchema.methods.getExperienceRating = function(game, season) {
+    return underscore.reduce(this.teams, function(memo, team) {
+        if (team.game == game && team.season == season) {
+            var multiplier = 1;
+
+            if (team.division == 'open') {
+                multiplier = 1;
+            }
+            else if (team.division == 'intermediate') {
+                multiplier = 2;
+            }
+            else if (team.division == 'main') {
+                multiplier = 3;
+            }
+            else if (team.division == 'premier') {
+                multiplier = 4;
+            }
+            else if (team.division == 'invite') {
+                multiplier = 5;
+            }
+
+            memo += multiplier * team.matches.length;
+        }
+
+        return memo;
+    }, 0);
+};
+
 playerSchema.virtual('experienceRating').get(function() {
     return underscore.reduce(this.teams, function(memo, team) {
         var multiplier = 1;

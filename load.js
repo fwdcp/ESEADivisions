@@ -15,6 +15,7 @@ var ratelimiter = new limiter.RateLimiter(10, 'second');
 commander
     .version('0.1.0')
     .option('--preload', 'only retrieve missing records')
+    .option('--division [id]', 'retrieve records for a specific division', false)
     .option('--skip-division-teams', 'skip retrieving teams from divisions')
     .option('--skip-team-history', 'skip updating team history')
     .option('--skip-team-players', 'skip retrieving players from teams')
@@ -63,13 +64,18 @@ async.auto({
     },
     "divisions": ['esea', function(cb, results) {
         if (!commander.skipDivisionTeams) {
-            cb(null, underscore.flatten(underscore.map(results.esea.select_division_id, function(season, seasonName) {
-                return underscore.map(season, function(region, regionName) {
-                    return underscore.map(region, function(divisionName, division) {
-                        return division;
+            if (commander.division) {
+                cb(null, [commander.division]);
+            }
+            else {
+                cb(null, underscore.flatten(underscore.map(results.esea.select_division_id, function(season, seasonName) {
+                    return underscore.map(season, function(region, regionName) {
+                        return underscore.map(region, function(divisionName, division) {
+                            return division;
+                        });
                     });
-                });
-            })));
+                })));
+            }
         }
         else {
             cb();

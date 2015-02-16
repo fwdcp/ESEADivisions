@@ -18,12 +18,12 @@
                             <th><abbr title="Losses">L</abbr></th>
                             <th><abbr title="Ties">T</abbr></th>
                             <th><abbr title="Record Percentage">PCT</abbr></th>
-                            <th><abbr title="Matches Played">MP</abbr></th>
-                            <th><abbr title="Forfeit Wins">FFW</abbr></th>
-                            <th><abbr title="Forfeit Losses">FFL</abbr></th>
                             <th><abbr title="Rounds For">RF</abbr></th>
                             <th><abbr title="Rounds Against">RA</abbr></th>
                             <th><abbr title="Rounds Percentage">RPCT</abbr></th>
+                            <th><abbr title="Matches Played">MP</abbr></th>
+                            <th><abbr title="Forfeit Wins">FFW</abbr></th>
+                            <th><abbr title="Forfeit Losses">FFL</abbr></th>
                             <th><abbr title="Schedule of Strength - Opponent Wins">SOS-W</abbr></th>
                             <th><abbr title="Schedule of Strength - Opponent Losses">SOS-L</abbr></th>
                             <th><abbr title="Schedule of Strength - Opponent Ties">SOS-T</abbr></th>
@@ -42,12 +42,12 @@
                             <td>{{team.record.losses}}</td>
                             <td>{{team.record.ties}}</td>
                             <td>{{(team.record.wins + (0.5 * team.record.ties)) / (team.record.wins + team.record.losses + team.record.ties) | normalizeDecimal}}</td>
-                            <td>{{team.record.wins + team.record.losses + team.record.ties}}</td>
-                            <td>{{team.forfeits.wins}}</td>
-                            <td>{{team.forfeits.losses}}</td>
                             <td>{{team.record.pointsFor}}</td>
                             <td>{{team.record.pointsAgainst}}</td>
                             <td>{{(team.record.pointsFor) / (team.record.pointsFor + team.record.pointsAgainst) | normalizeDecimal}}</td>
+                            <td>{{team.record.wins + team.record.losses + team.record.ties}}</td>
+                            <td>{{team.forfeits.wins}}</td>
+                            <td>{{team.forfeits.losses}}</td>
                             <td>{{team.scheduleStrength.wins}}</td>
                             <td>{{team.scheduleStrength.losses}}</td>
                             <td>{{team.scheduleStrength.ties}}</td>
@@ -79,7 +79,9 @@
                 this.async(this.sortTables);
             },
             "sortTables": function() {
-                $("html /deep/ #team-tables /deep/ table").tablesorter();
+                $("html /deep/ #team-tables /deep/ table").tablesorter({
+                    sortList: [[4, 1], [5, 1], [6, 0]]
+                });
             },
             "toJSON": function(value) {
                 return JSON.stringify(value);

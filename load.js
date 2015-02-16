@@ -281,6 +281,20 @@ async.auto({
                         }
                     }
 
+                    teamSeason.forfeits = underscore.reduce(teamSeason.matches, function(forfeits, match) {
+                        if (match.outcomeType == 'forfeit') {
+                            if (match.atFault) {
+                                forfeits.losses++;
+                            }
+                            else {
+                                forfeits.wins++;
+                            }
+                        }
+                    }, {
+                        wins: 0,
+                        losses: 0
+                    });
+
                     saveQueue.push(teamSeason, cb);
                 }, cb);
             }

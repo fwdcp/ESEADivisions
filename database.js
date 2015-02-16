@@ -104,6 +104,10 @@ var teamSeasonSchema = new mongoose.Schema({
         pointsFor: Number,
         pointsAgainst: Number
     },
+    forfeits: {
+        wins: Number,
+        losses: Number
+    },
     experienceRating: Number,
     scheduleStrength: {
         wins: Number,

@@ -5,6 +5,10 @@
     <template>
         <div id="container">
             <template repeat="{{group in teams}}">
+                <template if="{{group.length}}">
+                    <h3>#{group[0].conference | capitalize} Conference, #{group[0].group}</h3>
+                </template>
+
                 <sortable-table class="default" rowTemplate="rowTemplate" sortColumn="percentage" sortDescending="1">
                     <sortable-column name="name">Team</sortable-column>
                     <sortable-column name="wins" formula="function(row) { return +row.record.wins; }"><abbr title="Wins">W</abbr></sortable-column>
@@ -53,7 +57,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
 
     <script>
-        PolymerExpressions.prototype.normalizeDecimal =  function(value) {
+        PolymerExpressions.prototype.normalizeDecimal = function(value) {
             return numeral(value).format('0.000');
         };
 
@@ -61,6 +65,9 @@
             "teams": [],
             "toJSON": function(value) {
                 return JSON.stringify(value);
+            },
+            "capitalize": function(value) {
+                return value.charAt(0).toUpperCase() + value.slice(1);
             }
         });
     </script>

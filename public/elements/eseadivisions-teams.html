@@ -76,6 +76,9 @@
         Polymer({
             "teams": [],
             "teamsChanged": function(oldValue, newValue) {
+                this.async(this.sortTables);
+            },
+            "sortTables": function() {
                 $("html /deep/ #team-tables /deep/ table").tablesorter();
             },
             "toJSON": function(value) {

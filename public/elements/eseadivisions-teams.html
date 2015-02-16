@@ -6,7 +6,7 @@
         <div id="container">
             <template repeat="{{group in teams}}">
                 <template if="{{group.length}}">
-                    <h3>#{group[0].conference | capitalize} Conference, #{group[0].group}</h3>
+                    <h3>{{group[0].conference | capitalize}} Conference, {{group[0].group}}</h3>
                 </template>
 
                 <sortable-table class="default" rowTemplate="rowTemplate" sortColumn="percentage" sortDescending="1">

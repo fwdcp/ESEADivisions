@@ -316,7 +316,7 @@ async.auto({
             streamWorker(database.TeamSeason.find(options, {'team': 1, 'raw.history.team_roster': 1}).stream(), 10, function(teamSeason, done) {
                 if (teamSeason.raw.history.team_roster) {
                     async.each(teamSeason.raw.history.team_roster, function(playerInfo, cb) {
-                        queryQueue.push(database.Player.findOne({player: player.id}, {'player': 1, 'alias': 1}), function(err, player) {
+                        queryQueue.push(database.Player.findOne({player: playerInfo.id}, {'player': 1, 'alias': 1}), function(err, player) {
                             if (err) {
                                 cb(err);
                             }

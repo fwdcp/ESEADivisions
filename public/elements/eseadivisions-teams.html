@@ -18,6 +18,9 @@
                             <th><abbr title="Losses">L</abbr></th>
                             <th><abbr title="Ties">T</abbr></th>
                             <th><abbr title="Record Percentage">PCT</abbr></th>
+                            <th><abbr title="Matches Played">MP</abbr></th>
+                            <th><abbr title="Forfeit Wins">FFW</abbr></th>
+                            <th><abbr title="Forfeit Losses">FFL</abbr></th>
                             <th><abbr title="Rounds For">RF</abbr></th>
                             <th><abbr title="Rounds Against">RA</abbr></th>
                             <th><abbr title="Rounds Percentage">RPCT</abbr></th>
@@ -39,15 +42,18 @@
                             <td>{{team.record.losses}}</td>
                             <td>{{team.record.ties}}</td>
                             <td>{{(team.record.wins + (0.5 * team.record.ties)) / (team.record.wins + team.record.losses + team.record.ties) | normalizeDecimal}}</td>
-                            <td>{{team.record.roundsFor}}</td>
-                            <td>{{team.record.roundsAgainst}}</td>
+                            <td>{{team.record.wins + team.record.losses + team.record.ties}}</td>
+                            <td>{{team.forfeits.wins}}</td>
+                            <td>{{team.forfeits.losses}}</td>
+                            <td>{{team.record.pointsFor}}</td>
+                            <td>{{team.record.pointsAgainst}}</td>
                             <td>{{(team.record.pointsFor) / (team.record.pointsFor + team.record.pointsAgainst) | normalizeDecimal}}</td>
                             <td>{{team.scheduleStrength.wins}}</td>
                             <td>{{team.scheduleStrength.losses}}</td>
                             <td>{{team.scheduleStrength.ties}}</td>
                             <td>{{(team.scheduleStrength.wins + (0.5 * team.scheduleStrength.ties)) / (team.scheduleStrength.wins + team.scheduleStrength.losses + team.scheduleStrength.ties) | normalizeDecimal}}</td>
-                            <td>{{team.scheduleStrength.roundsFor}}</td>
-                            <td>{{team.scheduleStrength.roundsAgainst}}</td>
+                            <td>{{team.scheduleStrength.pointsFor}}</td>
+                            <td>{{team.scheduleStrength.pointsAgainst}}</td>
                             <td>{{(team.scheduleStrength.pointsFor) / (team.scheduleStrength.pointsFor + team.scheduleStrength.pointsAgainst) | normalizeDecimal}}</td>
                             <td>{{team.record.experienceRating | normalizeDecimal}}</td>
                             <td>{{team.scheduleStrength.opponentExperienceRating | normalizeDecimal}}</td>

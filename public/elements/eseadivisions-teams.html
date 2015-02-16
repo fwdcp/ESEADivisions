@@ -1,5 +1,4 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/sortable-table/sortable-table.html">
 
 <polymer-element name="eseadivisions-teams" attributes="teams">
     <template>
@@ -9,47 +8,50 @@
                     <h3>{{group[0].conference | capitalize}} Conference, {{group[0].group}}</h3>
                 </template>
 
-                <sortable-table class="default" rowTemplate="rowTemplate" sortColumn="percentage" sortDescending="1">
-                    <sortable-column name="name">Team</sortable-column>
-                    <sortable-column name="wins" formula="function(row) { return +row.record.wins; }"><abbr title="Wins">W</abbr></sortable-column>
-                    <sortable-column name="losses" formula="function(row) { return +row.record.losses; }"><abbr title="Losses">L</abbr></sortable-column>
-                    <sortable-column name="ties" formula="function(row) { return +row.record.ties; }"><abbr title="Ties">T</abbr></sortable-column>
-                    <sortable-column name="percentage" formula="function(row) { return ((+row.record.wins + (0.5 * +row.record.ties)) / (+row.record.wins + +row.record.losses + +row.record.ties)); }"><abbr title="Record Percentage">PCT</abbr></sortable-column>
-                    <sortable-column name="roundsFor" formula="function(row) { return +row.record.pointsFor; }"><abbr title="Rounds For">RF</abbr></sortable-column>
-                    <sortable-column name="roundsAgainst" formula="function(row) { return +row.record.pointsAgainst; }"><abbr title="Rounds Against">RA</abbr></sortable-column>
-                    <sortable-column name="roundsPercentage" formula="function(row) { return ((+row.record.pointsFor) / (+row.record.pointsFor + +row.record.pointsAgainst)); }"><abbr title="Rounds Percentage">RPCT</abbr></sortable-column>
-                    <sortable-column name="opponentWins" formula="function(row) { return +row.scheduleStrength.wins; }"><abbr title="Schedule of Strength - Opponent Wins">SOS-W</abbr></sortable-column>
-                    <sortable-column name="opponentLosses" formula="function(row) { return +row.scheduleStrength.losses; }"><abbr title="Schedule of Strength - Opponent Losses">SOS-L</abbr></sortable-column>
-                    <sortable-column name="opponentTies" formula="function(row) { return +row.scheduleStrength.ties; }"><abbr title="Schedule of Strength - Opponent Ties">SOS-T</abbr></sortable-column>
-                    <sortable-column name="opponentPercentage" formula="function(row) { return ((+row.scheduleStrength.wins + (0.5 * +row.scheduleStrength.ties)) / (+row.scheduleStrength.wins + +row.scheduleStrength.losses + +row.scheduleStrength.ties)); }"><abbr title="Schedule of Strength - Opponent Record Percentage">SOS-PCT</abbr></sortable-column>
-                    <sortable-column name="opponentRoundsFor" formula="function(row) { return +row.scheduleStrength.pointsFor; }"><abbr title="Schedule of Strength - Opponent Rounds For">SOS-RF</abbr></sortable-column>
-                    <sortable-column name="opponentRoundsAgainst" formula="function(row) { return +row.scheduleStrength.pointsAgainst; }"><abbr title="Schedule of Strength - Opponent Rounds Against">SOS-RA</abbr></sortable-column>
-                    <sortable-column name="opponentRoundsPercentage" formula="function(row) { return ((+row.scheduleStrength.pointsFor) / (+row.scheduleStrength.pointsFor + +row.scheduleStrength.pointsAgainst)); }"><abbr title="Schedule of Strength - Opponent Rounds Percentage">SOS-RPCT</abbr></sortable-column>
-                    <sortable-column name="experienceRating"><abbr title="Experience Rating">ER</abbr></sortable-column>
-                    <sortable-column name="opponentExperienceRating" formula="function(row) { return +row.scheduleStrength.experienceRating; }"><abbr title="Schedule of Strength - Opponent Experience Rating">SOS-ER</abbr></sortable-column>
-
-                    <template id="rowTemplate">
-                        <td><a href="http://play.esea.net/teams/{{record.row.team}}">{{record.fields.name.value}}</a></td>
-                        <td>{{record.fields.wins.value}}</td>
-                        <td>{{record.fields.losses.value}}</td>
-                        <td>{{record.fields.ties.value}}</td>
-                        <td>{{record.fields.percentage.value | normalizeDecimal}}</td>
-                        <td>{{record.fields.roundsFor.value}}</td>
-                        <td>{{record.fields.roundsAgainst.value}}</td>
-                        <td>{{record.fields.roundsPercentage.value | normalizeDecimal}}</td>
-                        <td>{{record.fields.opponentWins.value}}</td>
-                        <td>{{record.fields.opponentLosses.value}}</td>
-                        <td>{{record.fields.opponentTies.value}}</td>
-                        <td>{{record.fields.opponentPercentage.value | normalizeDecimal}}</td>
-                        <td>{{record.fields.opponentRoundsFor.value}}</td>
-                        <td>{{record.fields.opponentRoundsAgainst.value}}</td>
-                        <td>{{record.fields.opponentRoundsPercentage.value | normalizeDecimal}}</td>
-                        <td>{{record.fields.experienceRating.value | normalizeDecimal}}</td>
-                        <td>{{record.fields.opponentExperienceRating.value | normalizeDecimal}}</td>
-                    </template>
-
-                    {{group | toJSON}}
-                </sortable-table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th><abbr title="Wins">W</abbr></th>
+                            <th><abbr title="Losses">L</abbr></th>
+                            <th><abbr title="Ties">T</abbr></th>
+                            <th><abbr title="Record Percentage">PCT</abbr></th>
+                            <th><abbr title="Rounds For">RF</abbr></th>
+                            <th><abbr title="Rounds Against">RA</abbr></th>
+                            <th><abbr title="Rounds Percentage">RPCT</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Wins">SOS-W</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Losses">SOS-L</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Ties">SOS-T</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Record Percentage">SOS-PCT</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Rounds For">SOS-RF</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Rounds Against">SOS-RA</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Rounds Percentage">SOS-RPCT</abbr></th>
+                            <th><abbr title="Experience Rating">ER</abbr></th>
+                            <th><abbr title="Schedule of Strength - Opponent Experience Rating">SOS-ER</abbr></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr template repeat="{{team in group}}">
+                            <td><a href="http://play.esea.net/teams/{{team.team}}">{{team.name}}</a></td>
+                            <td>{{team.record.wins}}</td>
+                            <td>{{team.record.losses}}</td>
+                            <td>{{team.record.ties}}</td>
+                            <td>{{(row.record.wins + (0.5 * row.record.ties)) / (row.record.wins + row.record.losses + row.record.ties) | normalizeDecimal}}</td>
+                            <td>{{team.record.roundsFor}}</td>
+                            <td>{{team.record.roundsAgainst}}</td>
+                            <td>{{(team.record.pointsFor) / (team.record.pointsFor + team.record.pointsAgainst) | normalizeDecimal}}</td>
+                            <td>{{team.scheduleStrength.wins}}</td>
+                            <td>{{team.scheduleStrength.losses}}</td>
+                            <td>{{team.scheduleStrength.ties}}</td>
+                            <td>{{(team.scheduleStrength.wins + (0.5 * team.scheduleStrength.ties)) / (team.scheduleStrength.wins + team.scheduleStrength.losses + team.scheduleStrength.ties) | normalizeDecimal}}</td>
+                            <td>{{team.scheduleStrength.roundsFor}}</td>
+                            <td>{{team.scheduleStrength.roundsAgainst}}</td>
+                            <td>{{(team.scheduleStrength.pointsFor) / (team.scheduleStrength.pointsFor + team.scheduleStrength.pointsAgainst) | normalizeDecimal}}</td>
+                            <td>{{team.record.experienceRating | normalizeDecimal}}</td>
+                            <td>{{team.scheduleStrength.opponentExperienceRating | normalizeDecimal}}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </template>
         </div>
     </template>

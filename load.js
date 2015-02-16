@@ -14,6 +14,7 @@ var ratelimiter = new limiter.RateLimiter(10, 'second');
 
 commander
     .version('0.1.0')
+    .option('--preload', 'only retrieve missing records')
     .option('--skip-division-teams', 'skip retrieving teams from divisions')
     .option('--skip-team-history', 'skip updating team history')
     .option('--skip-team-players', 'skip retrieving players from teams')
@@ -76,9 +77,6 @@ async.auto({
     }],
     "teams": ['divisions', function(cb, results) {
         if (!commander.skipDivisionTeams) {
-            console.log('teams');
-            console.time('teams');
-
             async.each(results.divisions, function(division, cb) {
                 async.auto({
                     "esea": function(cb) {
@@ -164,11 +162,7 @@ async.auto({
                         }, cb);
                     }]
                 }, cb);
-            }, function(err) {
-                console.timeEnd('teams');
-
-                cb(err);
-            });
+            }, cb);
         }
         else {
             cb();
@@ -176,10 +170,17 @@ async.auto({
     }],
     "teamHistory": ['teams', function(cb, results) {
         if (!commander.skipTeamHistory) {
-            console.log('teamHistory');
-            console.time('teamHistory');
+            var options = {};
 
-            queryQueue.push(database.TeamSeason.find({'raw.history': {$exists: false}}, {'team': 1, 'series': 1, 'raw.history': 1}), function(err, teamSeasons) {
+            if (commander.preload) {
+                options['raw.history'] = {$exists: false};
+            }
+
+            if (commander.division) {
+                options['event'] = commander.division;
+            }
+
+            queryQueue.push(database.TeamSeason.find(options, {'team': 1, 'series': 1, 'raw.history': 1}), function(err, teamSeasons) {
                 if (err) {
                     cb(err);
                 }
@@ -249,11 +250,7 @@ async.auto({
                         else {
                             cb();
                         }
-                    }, function(err) {
-                        console.timeEnd('teamHistory');
-
-                        cb(err);
-                    });
+                    }, cb);
                 }
             });
         }
@@ -263,16 +260,21 @@ async.auto({
     }],
     "players": ['teamHistory', function(cb, results) {
         if (!commander.skipTeamPlayers) {
-            console.log('players');
-            console.time('players');
+            var options = {};
 
-            queryQueue.push(database.TeamSeason.find({'raw.history': {$exists: true}}, {'team': 1, 'raw.history.team_roster': 1}), function(err, teamSeasons) {
+            if (commander.preload) {
+                options['raw.history'] = {$exists: false};
+            }
+
+            if (commander.division) {
+                options['event'] = commander.division;
+            }
+
+            queryQueue.push(database.TeamSeason.find(options, {'team': 1, 'raw.history.team_roster': 1}), function(err, teamSeasons) {
                 if (err) {
                     cb(err);
                 }
                 else {
-                    console.log(teamSeasons.length);
-
                     async.each(teamSeasons, function(teamSeason, cb) {
                         if (teamSeason.raw.history.team_roster) {
                             async.each(teamSeason.raw.history.team_roster, function(player, cb) {
@@ -300,11 +302,7 @@ async.auto({
                         else {
                             cb();
                         }
-                    }, function(err) {
-                        console.timeEnd('players');
-
-                        cb(err);
-                    });
+                    }, cb);
                 }
             });
         }
@@ -314,10 +312,17 @@ async.auto({
     }],
     "playerHistory": ['players', function(cb, results) {
         if (!commander.skipPlayerHistory) {
-            console.log('playerHistory');
-            console.time('playerHistory');
+            var options = {};
 
-            queryQueue.push(database.Player.find({'raw.history': {$exists: false}}, {'player': 1, 'raw.history': 1}), function(err, players) {
+            if (commander.preload) {
+                options['raw.history'] = {$exists: false};
+            }
+
+            if (commander.division) {
+                options['teams.event'] = commander.division;
+            }
+
+            queryQueue.push(database.Player.find(options, {'player': 1, 'raw.history': 1}), function(err, players) {
                 if (err) {
                     cb(err);
                 }
@@ -362,11 +367,7 @@ async.auto({
                         else {
                             cb();
                         }
-                    }, function(err) {
-                        console.timeEnd('playerHistory');
-
-                        cb(err);
-                    });
+                    }, cb);
                 }
             });
         }
@@ -375,10 +376,13 @@ async.auto({
         }
     }],
     "experienceRatings": ['playerHistory', 'teamHistory', function(cb, results) {
-        console.log('experienceRatings');
-        console.time('experienceRatings');
+        var options = {};
 
-        queryQueue.push(database.TeamSeason.find({experienceRating: {$exists: false}}, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1, 'experienceRating': 1}), function(err, teamSeasons) {
+        if (commander.division) {
+            options['teams.event'] = commander.division;
+        }
+
+        queryQueue.push(database.TeamSeason.find(options, {'team': 1, 'game': 1, 'season': 1, 'series': 1, 'event': 1, 'division': 1, 'experienceRating': 1}), function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -439,19 +443,18 @@ async.auto({
                             saveQueue.push(teamSeason, cb);
                         }
                     });
-                }, function(err) {
-                    console.timeEnd('experienceRatings');
-
-                    cb(err);
-                });
+                }, cb);
             }
         });
     }],
     "scheduleStrengths": ['teams', 'experienceRatings', function(cb, results) {
-        console.log('scheduleStrengths');
-        console.time('scheduleStrengths');
+        var options = {};
 
-        queryQueue.push(database.TeamSeason.find({}, {'season': 1, 'record': 1, 'matches': 1, 'scheduleStrength': 1}), function(err, teamSeasons) {
+        if (commander.division) {
+            options['event'] = commander.division;
+        }
+
+        queryQueue.push(database.TeamSeason.find(options, {'season': 1, 'record': 1, 'matches': 1, 'scheduleStrength': 1}), function(err, teamSeasons) {
             if (err) {
                 cb(err);
             }
@@ -532,14 +535,17 @@ async.auto({
                             saveQueue.push(teamSeason, cb);
                         }
                     });
-                }, function(err) {
-                    console.timeEnd('scheduleStrengths');
-
-                    cb(err);
-                });
+                }, cb);
             }
         });
     }]
 }, function(err, results) {
     console.log(err);
+
+    if (err) {
+        process.exit(1);
+    }
+    else {
+        process.exit();
+    }
 });

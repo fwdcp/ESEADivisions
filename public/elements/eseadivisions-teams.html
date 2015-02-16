@@ -2,13 +2,15 @@
 
 <polymer-element name="eseadivisions-teams" attributes="teams">
     <template>
-        <div id="container">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/css/theme.green.css">
+
+        <div id="team-tables">
             <template repeat="{{group in teams}}">
                 <template if="{{group.length}}">
                     <h3>{{group[0].conference | capitalize}} Conference, {{group[0].group}}</h3>
                 </template>
 
-                <table>
+                <table class="tablesorter-green">
                     <thead>
                         <tr>
                             <th>Team</th>
@@ -56,6 +58,8 @@
         </div>
     </template>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/js/jquery.tablesorter.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
 
     <script>
@@ -65,6 +69,9 @@
 
         Polymer({
             "teams": [],
+            "teamsChanged": function(oldValue, newValue) {
+                $("html /deep/ #team-tables /deep/ table").tablesorter();
+            },
             "toJSON": function(value) {
                 return JSON.stringify(value);
             },

@@ -59,6 +59,12 @@ express.get('/divisions/list.json', function(req, res) {
 var currentInfoUpdates = {};
 
 express.get('/divisions/:id.json', function(req, res) {
+    if (!req.params.id) {
+        res.sendStatus(404);
+
+        return;
+    }
+    
     if (!currentInfoUpdates[req.params.id]) {
         currentInfoUpdates[req.params.id] = new events.EventEmitter();
 

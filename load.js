@@ -19,7 +19,7 @@ commander
     .option('--skip-division-teams', 'skip retrieving teams from divisions')
     .option('--skip-team-history', 'skip updating team history')
     .option('--skip-team-players', 'skip retrieving players from teams')
-    .option('--skip-player-history', 'skip updating team history')
+    .option('--skip-player-history', 'skip updating player history')
     .parse(process.argv);
 
 var queryQueue = async.queue(function(query, cb) {

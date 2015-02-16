@@ -586,9 +586,9 @@ async.auto({
         }, cb);
     }]
 }, function(err, results) {
-    console.log(err);
-
     if (err) {
+        console.log(err);
+        
         process.exit(1);
     }
     else {

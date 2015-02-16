@@ -95,7 +95,7 @@ express.get('/divisions/:id.json', function(req, res) {
             }
             else {
                 res.json(underscore.map(teamSeasons, function(teamSeason) {
-                    return underscore.omit(teamSeason.toObject(), 'raw');
+                    return underscore.omit(teamSeason.toObject(), 'raw', '__v', '_id');
                 }));
             }
         });

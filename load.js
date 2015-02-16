@@ -15,6 +15,7 @@ var ratelimiter = new limiter.RateLimiter(10, 'second');
 
 commander
     .version('0.1.0')
+    .option('--incremental', 'only retrieve records that may require an update')
     .option('--preload', 'only retrieve missing records')
     .option('--division [id]', 'retrieve records for a specific division', false)
     .option('--skip-division-teams', 'skip retrieving teams from divisions')
@@ -30,6 +31,9 @@ var queryQueue = async.queue(function(query, cb) {
 var saveQueue = async.queue(function(doc, cb) {
     doc.save(cb);
 }, 10);
+
+var incrementalTeams = [];
+var incrementalPlayers = [];
 
 async.auto({
     "esea": function(cb) {
@@ -146,6 +150,10 @@ async.auto({
                                                     teamSeason = new database.TeamSeason(teamInfo);
                                                 }
 
+                                                if (!underscore.isEqual(teamSeason.raw.standings, teamListing)) {
+                                                    incrementalTeams.push(teamSeason.team);
+                                                }
+
                                                 teamSeason.raw.standings = teamListing;
                                                 teamSeason.markModified('raw.standings');
 
@@ -177,6 +185,10 @@ async.auto({
 
             if (commander.division) {
                 options['event'] = commander.division;
+            }
+
+            if (commander.incremental) {
+                options['team'] = {$in: incrementalTeams};
             }
 
             streamWorker(database.TeamSeason.find(options, {'team': 1, 'series': 1, 'raw.history': 1}).stream(), 10, function(teamSeason, done) {
@@ -303,18 +315,20 @@ async.auto({
 
             streamWorker(database.TeamSeason.find(options, {'team': 1, 'raw.history.team_roster': 1}).stream(), 10, function(teamSeason, done) {
                 if (teamSeason.raw.history.team_roster) {
-                    async.each(teamSeason.raw.history.team_roster, function(player, cb) {
-                        queryQueue.push(database.Player.findOne({player: player.id}, {'player': 1, 'alias': 1}), function(err, playerDoc) {
+                    async.each(teamSeason.raw.history.team_roster, function(playerInfo, cb) {
+                        queryQueue.push(database.Player.findOne({player: player.id}, {'player': 1, 'alias': 1}), function(err, player) {
                             if (err) {
                                 cb(err);
                             }
                             else {
-                                if (!playerDoc) {
-                                    playerDoc = new database.Player({
-                                        player: player.id
+                                if (!player) {
+                                    player = new database.Player({
+                                        player: playerInfo.id
                                     });
 
-                                    saveQueue.push(playerDoc, cb);
+                                    incrementalPlayers.push(player.player);
+
+                                    saveQueue.push(player, cb);
                                 }
                                 else {
                                     cb();
@@ -342,6 +356,10 @@ async.auto({
 
             if (commander.division) {
                 options['teams.event'] = commander.division;
+            }
+
+            if (commander.incremental) {
+                options['team'] = {$in: incrementalPlayers};
             }
 
             streamWorker(database.Player.find(options, {'player': 1, 'raw.history': 1}).stream(), 10, function(player, done) {

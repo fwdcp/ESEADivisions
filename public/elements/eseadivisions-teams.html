@@ -55,8 +55,8 @@
                             <td>{{team.scheduleStrength.pointsFor}}</td>
                             <td>{{team.scheduleStrength.pointsAgainst}}</td>
                             <td>{{(team.scheduleStrength.pointsFor) / (team.scheduleStrength.pointsFor + team.scheduleStrength.pointsAgainst) | normalizeDecimal}}</td>
-                            <td>{{team.record.experienceRating | normalizeDecimal}}</td>
-                            <td>{{team.scheduleStrength.opponentExperienceRating | normalizeDecimal}}</td>
+                            <td>{{team.experienceRating | normalizeDecimal}}</td>
+                            <td>{{team.scheduleStrength.experienceRating | normalizeDecimal}}</td>
                         </tr>
                     </tbody>
                 </table>

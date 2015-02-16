@@ -87,7 +87,9 @@
                 this.$.main.togglePanel();
             },
             "retrievalError": function(event, detail, sender) {
-                this.$.divisionRetrievalFailedNotification.show();
+                if (this.selectedDivision) {
+                    this.$.divisionRetrievalFailedNotification.show();
+                }
             },
             "refreshDivision": function(event, detail, sender) {
                 this.$.divisionAPI.go();

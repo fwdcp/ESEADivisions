@@ -36,7 +36,7 @@
                             <td>{{team.record.wins}}</td>
                             <td>{{team.record.losses}}</td>
                             <td>{{team.record.ties}}</td>
-                            <td>{{(row.record.wins + (0.5 * row.record.ties)) / (row.record.wins + row.record.losses + row.record.ties) | normalizeDecimal}}</td>
+                            <td>{{(team.record.wins + (0.5 * team.record.ties)) / (team.record.wins + team.record.losses + team.record.ties) | normalizeDecimal}}</td>
                             <td>{{team.record.roundsFor}}</td>
                             <td>{{team.record.roundsAgainst}}</td>
                             <td>{{(team.record.pointsFor) / (team.record.pointsFor + team.record.pointsAgainst) | normalizeDecimal}}</td>

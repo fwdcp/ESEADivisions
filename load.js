@@ -233,7 +233,7 @@ async.auto({
             options['event'] = commander.division;
         }
 
-        streamWorker(database.TeamSeason.find(options, {'team': 1, 'raw.history': 1}).stream(), 10, function(teamSeason, done) {
+        streamWorker(database.TeamSeason.find(options, {'team': 1, 'raw.standings': 1, 'raw.history': 1}).stream(), 10, function(teamSeason, done) {
             if (teamSeason.raw.standings) {
                 teamSeason.name = teamSeason.raw.standings.name;
                 teamSeason.record.wins = teamSeason.raw.standings.match_win;

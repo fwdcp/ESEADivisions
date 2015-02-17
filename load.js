@@ -233,6 +233,10 @@ async.auto({
             options['event'] = commander.division;
         }
 
+        if (commander.incremental) {
+            options['team'] = {$in: incrementalTeams};
+        }
+
         streamWorker(database.TeamSeason.find(options, {'team': 1, 'raw.standings': 1, 'raw.history': 1}).stream(), 10, function(teamSeason, done) {
             if (teamSeason.raw.standings) {
                 teamSeason.name = teamSeason.raw.standings.name;
@@ -359,7 +363,7 @@ async.auto({
             }
 
             if (commander.incremental) {
-                options['team'] = {$in: incrementalPlayers};
+                options['player'] = {$in: incrementalPlayers};
             }
 
             streamWorker(database.Player.find(options, {'player': 1, 'raw.history': 1}).stream(), 10, function(player, done) {
@@ -400,6 +404,10 @@ async.auto({
 
         if (commander.division) {
             options['teams.event'] = commander.division;
+        }
+
+        if (commander.incremental) {
+            options['player'] = {$in: incrementalPlayers};
         }
 
         streamWorker(database.Player.find(options, {'raw.history': 1}).stream(), 10, function(player, done) {

@@ -359,7 +359,7 @@ async.auto({
             }
 
             if (commander.division) {
-                options['teams.event'] = commander.division;
+                options['$or'] = [{'teams.event': commander.division}, {'player': {$in: incrementalPlayers}}];
             }
 
             if (commander.incremental) {

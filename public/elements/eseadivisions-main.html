@@ -67,9 +67,11 @@
             "players": [],
             "selectedDivision": '',
             "expanded": false,
-            "expandedChange": function(oldValue, newValue) {
+            "expandedChanged": function(oldValue, newValue) {
                 if (!newValue) {
-                    this.expandedTeam = null;
+                    this.async(function() {
+                        this.expandedTeam = null;
+                    });
                 }
             },
             "expandedTeam": null,

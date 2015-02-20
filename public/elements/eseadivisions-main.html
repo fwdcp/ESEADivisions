@@ -85,6 +85,7 @@
 
                 this.expandedTeamInfo.players = _.filter(this.players, function(player) {
                     var team = _.findWhere(player.teams, {
+                        id: this.expandedTeamInfo.team,
                         game: this.expandedTeamInfo.game,
                         season: this.expandedTeamInfo.season,
                         series: this.expandedTeamInfo.series,

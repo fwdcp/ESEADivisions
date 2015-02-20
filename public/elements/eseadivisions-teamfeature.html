@@ -81,15 +81,18 @@
                 return value.charAt(0).toUpperCase() + value.slice(1);
             },
             "teamChanged": function(oldValue, newValue) {
-                this.async(this.sortTables);
+                this.async(this.clearAndSortTables);
             },
-            "sortTables": function() {
+            "clearAndSortTables": function() {
                 $("html /deep/ #teamfeature-tables /deep/ #matches").trigger("destroy");
                 $("html /deep/ #teamfeature-tables /deep/ #players").trigger("destroy");
 
                 $("html /deep/ #teamfeature-tables /deep/ #matches tr").css("display", "");
                 $("html /deep/ #teamfeature-tables /deep/ #players tr").css("display", "");
 
+                this.async(this.sortTables);
+            },
+            "sortTables": function() {
                 $("html /deep/ #teamfeature-tables /deep/ #matches").tablesorter({
                     sortList: [[0, 0]],
                     theme: 'blue',

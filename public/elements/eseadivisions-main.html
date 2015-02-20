@@ -58,6 +58,7 @@
         on-core-error="{{retrievalError}}"></core-ajax>
     </template>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
 
     <script>
@@ -83,7 +84,11 @@
                     this.expandedTeamInfo.matches[i].opposingTeamInfo = _.findWhere(this.teams, {team: this.expandedTeamInfo.matches[i].opposingTeam});
                 }
 
-                this.expandedTeamInfo.players = _.filter(this.players, function(player) {
+                this.expandedTeamInfo.matches = _.sortBy(this.expandedTeamInfo.matches, function(match) {
+                    return moment(match.startTime).unix();
+                });
+
+                this.expandedTeamInfo.players = _.sortBy(_.filter(this.players, function(player) {
                     var team = _.findWhere(player.teams, {
                         id: this.expandedTeamInfo.team,
                         game: this.expandedTeamInfo.game,
@@ -99,7 +104,9 @@
                     else {
                         return false;
                     }
-                }, this);
+                }, this), function(team) {
+                    return team.matches.length;
+                }).reverse();
 
                 this.expanded = true;
             },

@@ -88,7 +88,7 @@
                     return moment(match.startTime).unix();
                 });
 
-                this.expandedTeamInfo.players = _.sortBy(_.filter(this.players, function(player) {
+                this.expandedTeamInfo.players = _.sortBy(_.sortBy(_.filter(this.players, function(player) {
                     var team = _.findWhere(player.teams, {
                         id: this.expandedTeamInfo.team,
                         game: this.expandedTeamInfo.game,
@@ -104,7 +104,7 @@
                     else {
                         return false;
                     }
-                }, this), function(player) {
+                }, this), 'experienceRating'), function(player) {
                     var team = _.findWhere(player.teams, {
                         id: this.expandedTeamInfo.team,
                         game: this.expandedTeamInfo.game,

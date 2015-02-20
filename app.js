@@ -114,7 +114,7 @@ express.get('/divisions/:id.json', function(req, res) {
                     players: underscore.map(results.players, function(player) {
                         var playerInfo = underscore.omit(player.toObject(), 'raw', '__v', '_id');
 
-                        var team = underscore.findWhere(player.teams, {event: req.params.id});
+                        var team = underscore.findWhere(player.teams, {event: +req.params.id});
 
                         if (team) {
                             playerInfo.experienceRating = player.getExperienceRating(team.game, team.season);

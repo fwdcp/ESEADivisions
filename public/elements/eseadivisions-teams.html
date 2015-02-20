@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="eseadivisions-teams" attributes="groups expandedTeam">
+<polymer-element name="eseadivisions-teams" attributes="groups selectedTeam">
     <template>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/css/theme.blue.css">
 
@@ -36,7 +36,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr template repeat="{{team in group}}">
+                        <tr template repeat="{{team in group}}" on-tap="{{selectTeam}}">
                             <td>{{team.name}}</td>
                             <td>{{team.record.wins}}</td>
                             <td>{{team.record.losses}}</td>
@@ -76,7 +76,7 @@
 
         Polymer({
             "groups": [],
-            "expandedTeam": null,
+            "selectedTeam": null,
             "groupsChanged": function(oldValue, newValue) {
                 this.async(this.sortTables);
             },
@@ -94,7 +94,7 @@
                 return value.charAt(0).toUpperCase() + value.slice(1);
             },
             "selectTeam": function(event, detail, sender) {
-                this.expandedTeam = event.target.templateInstance.model.team.team;
+                this.selectedTeam = event.target.templateInstance.model.team.team;
             }
         });
     </script>

@@ -413,9 +413,16 @@ async.auto({
         streamWorker(database.Player.find(options, {'raw.history': 1}).stream(), 10, function(player, done) {
             if (player.raw.history) {
                 if (player.raw.history.alias_history) {
-                    player.alias = underscore.find(player.raw.history.alias_history, function(value) {
+                    var currentAlias = underscore.find(player.raw.history.alias_history, function(value) {
                         return underscore.isUndefined(value.last_used);
                     });
+
+                    if (currentAlias) {
+                        player.alias = currentAlias.value;
+                    }
+                    else {
+                        player.alias = '';
+                    }
                 }
                 else {
                     player.alias = '';

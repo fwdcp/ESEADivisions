@@ -113,9 +113,9 @@
                         event: this.expandedTeamInfo.event,
                         division: this.expandedTeamInfo.division
                     });
-                    
+
                     return team.matches.length;
-                }).reverse();
+                }, this).reverse();
 
                 this.expanded = true;
             },

@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
 <link rel="import" href="../bower_components/core-menu/core-menu.html">
 <link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -35,7 +36,9 @@
             </core-toolbar>
             <div main class="content">
                 <eseadivisions-teams id="teams" selectedTeam="{{expandedTeam}}"></eseadivisions-teams>
-                <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}" expanded="{{expanded}}"></eseadivisions-teamfeature>
+                <paper-dialog backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-open="{{openChanged}}">
+                    <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
+                </paper-dialog>
             </div>
         </core-header-panel>
 
@@ -67,9 +70,8 @@
             "teams": [],
             "players": [],
             "selectedDivision": '',
-            "expanded": false,
-            "expandedChanged": function(oldValue, newValue) {
-                if (!newValue) {
+            "openChanged": function(event, detail, sender) {
+                if (!detail.opened) {
                     this.async(function() {
                         this.expandedTeam = null;
                     });
@@ -116,8 +118,6 @@
 
                     return team.matches.length;
                 }, this).reverse();
-
-                this.expanded = true;
             },
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {

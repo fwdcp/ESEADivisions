@@ -119,6 +119,8 @@ express.get('/divisions/:id.json', function(req, res) {
                         if (team) {
                             playerInfo.experienceRating = player.getExperienceRating(team.game, team.season);
                         }
+
+                        return playerInfo;
                     })
                 };
 

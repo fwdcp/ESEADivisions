@@ -98,7 +98,7 @@ express.get('/divisions/:id.json', function(req, res) {
                 database.TeamSeason.find({event: req.params.id}, cb);
             },
             players: function(cb) {
-                database.Player.find({'team.event': req.params.id}, cb);
+                database.Player.find({'teams.event': req.params.id}, cb);
             }
         }, function(err, results) {
             if (err) {

@@ -112,6 +112,12 @@ express.get('/divisions/:id.json', function(req, res) {
                         return underscore.omit(teamSeason.toObject(), 'raw', '__v', '_id');
                     }),
                     players: underscore.map(results.players, function(player) {
+                        var team = underscore.findWhere(player.teams, {event: req.params.id});
+
+                        if (team) {
+                            player.experienceRating = player.getExperienceRating(team.game, team.season);
+                        }
+                        
                         return underscore.omit(player.toObject(), 'raw', '__v', '_id');
                     })
                 };

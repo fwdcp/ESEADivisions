@@ -88,11 +88,7 @@
                         this.expandedTeamInfo.matches[i].opposingTeamInfo = _.findWhere(this.teams, {team: this.expandedTeamInfo.matches[i].opposingTeam});
                     }
 
-                    this.expandedTeamInfo.matches = _.sortBy(this.expandedTeamInfo.matches, function(match) {
-                        return moment(match.startTime).unix();
-                    });
-
-                    this.expandedTeamInfo.players = _.sortBy(_.sortBy(_.filter(this.players, function(player) {
+                    this.expandedTeamInfo.players = _.filter(this.players, function(player) {
                         var team = _.findWhere(player.teams, {
                             id: this.expandedTeamInfo.team,
                             game: this.expandedTeamInfo.game,
@@ -108,18 +104,7 @@
                         else {
                             return false;
                         }
-                    }, this), 'experienceRating'), function(player) {
-                        var team = _.findWhere(player.teams, {
-                            id: this.expandedTeamInfo.team,
-                            game: this.expandedTeamInfo.game,
-                            season: this.expandedTeamInfo.season,
-                            series: this.expandedTeamInfo.series,
-                            event: this.expandedTeamInfo.event,
-                            division: this.expandedTeamInfo.division
-                        });
-
-                        return team.matches.length;
-                    }, this).reverse();
+                    }, this);
 
                     this.async(function() {
                         this.$.dialog.open();

@@ -38,7 +38,7 @@
                 <eseadivisions-teams id="teams" selectedTeam="{{expandedTeam}}"></eseadivisions-teams>
             </div>
         </core-header-panel>
-        
+
         <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-close-completed="{{dialogClosed}}">
             <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
         </paper-dialog>
@@ -75,48 +75,53 @@
                 this.expandedTeam = null;
             },
             "expandedTeam": null,
-            "expandedTeamInfo": {},
+            "expandedTeamInfo": null,
             "expandedTeamChanged": function(oldValue, newValue) {
                 this.expandedTeamInfo = _.findWhere(this.teams, {team: this.expandedTeam});
 
-                for (var i = 0; i < this.expandedTeamInfo.matches.length; i++) {
-                    this.expandedTeamInfo.matches[i].opposingTeamInfo = _.findWhere(this.teams, {team: this.expandedTeamInfo.matches[i].opposingTeam});
+                if (this.expandedTeamInfo) {
+                    for (var i = 0; i < this.expandedTeamInfo.matches.length; i++) {
+                        this.expandedTeamInfo.matches[i].opposingTeamInfo = _.findWhere(this.teams, {team: this.expandedTeamInfo.matches[i].opposingTeam});
+                    }
+
+                    this.expandedTeamInfo.matches = _.sortBy(this.expandedTeamInfo.matches, function(match) {
+                        return moment(match.startTime).unix();
+                    });
+
+                    this.expandedTeamInfo.players = _.sortBy(_.sortBy(_.filter(this.players, function(player) {
+                        var team = _.findWhere(player.teams, {
+                            id: this.expandedTeamInfo.team,
+                            game: this.expandedTeamInfo.game,
+                            season: this.expandedTeamInfo.season,
+                            series: this.expandedTeamInfo.series,
+                            event: this.expandedTeamInfo.event,
+                            division: this.expandedTeamInfo.division
+                        });
+
+                        if (team) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    }, this), 'experienceRating'), function(player) {
+                        var team = _.findWhere(player.teams, {
+                            id: this.expandedTeamInfo.team,
+                            game: this.expandedTeamInfo.game,
+                            season: this.expandedTeamInfo.season,
+                            series: this.expandedTeamInfo.series,
+                            event: this.expandedTeamInfo.event,
+                            division: this.expandedTeamInfo.division
+                        });
+
+                        return team.matches.length;
+                    }, this).reverse();
+
+                    this.$.dialog.open();
                 }
-
-                this.expandedTeamInfo.matches = _.sortBy(this.expandedTeamInfo.matches, function(match) {
-                    return moment(match.startTime).unix();
-                });
-
-                this.expandedTeamInfo.players = _.sortBy(_.sortBy(_.filter(this.players, function(player) {
-                    var team = _.findWhere(player.teams, {
-                        id: this.expandedTeamInfo.team,
-                        game: this.expandedTeamInfo.game,
-                        season: this.expandedTeamInfo.season,
-                        series: this.expandedTeamInfo.series,
-                        event: this.expandedTeamInfo.event,
-                        division: this.expandedTeamInfo.division
-                    });
-
-                    if (team) {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }, this), 'experienceRating'), function(player) {
-                    var team = _.findWhere(player.teams, {
-                        id: this.expandedTeamInfo.team,
-                        game: this.expandedTeamInfo.game,
-                        season: this.expandedTeamInfo.season,
-                        series: this.expandedTeamInfo.series,
-                        event: this.expandedTeamInfo.event,
-                        division: this.expandedTeamInfo.division
-                    });
-
-                    return team.matches.length;
-                }, this).reverse();
-
-                this.$.dialog.open();
+                else {
+                    this.expandedTeamInfo = null;
+                }
             },
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {

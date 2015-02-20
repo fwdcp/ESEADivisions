@@ -117,7 +117,9 @@
                         return team.matches.length;
                     }, this).reverse();
 
-                    this.$.dialog.open();
+                    this.async(function() {
+                        this.$.dialog.open();
+                    });
                 }
                 else {
                     this.expandedTeamInfo = null;

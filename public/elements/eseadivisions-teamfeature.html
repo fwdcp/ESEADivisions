@@ -5,8 +5,8 @@
     <template>
         <paper-dialog backdrop heading="{{team.name}}" opened="{{expanded}}">
             <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/css/theme.blue.css">
-            
-            <table id="matches">
+
+            <table id="matches" class="tablesorter tablesorter-blue">
                 <thead>
                     <tr>
                         <th>Time</th>
@@ -14,19 +14,19 @@
                         <th>Map</th>
                         <th>Score</th>
                         <th>Status</th>
-                        <th>W</th>
-                        <th>L</th>
-                        <th>T</th>
-                        <th>PCT</th>
-                        <th>RF</th>
-                        <th>RA</th>
-                        <th>RPCT</th>
-                        <th>ER</th>
+                        <th><abbr title="Opponent Wins">W</abbr></th>
+                        <th><abbr title="Opponent Losses">L</abbr></th>
+                        <th><abbr title="Opponent Ties">T</abbr></th>
+                        <th><abbr title="Opponent Record Percentage">PCT</abbr></th>
+                        <th><abbr title="Opponent Rounds For">RF</abbr></th>
+                        <th><abbr title="Opponent Rounds Against">RA</abbr></th>
+                        <th><abbr title="Opponent Rounds Percentage">RPCT</abbr></th>
+                        <th><abbr title="Opponent Experience Rating">ER</abbr></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr template repeat="{{match in team.matches}}">
-                        <td>{{match.startTime | formatDate}}</td>
+                        <td><a href="http://play.esea.net/index.php?s=stats&d=match&id={{match.id}}">{{match.startTime | formatDate}}</a></td>
                         <td><a href="http://play.esea.net/teams/{{match.opposingTeam}}">{{match.opposingTeamInfo.name}}</a></td>
                         <td>{{match.gamesPlayed == 1 ? match.map : "Multiple"}}</td>
                         <td>{{match.status == "completed" ? (match.gamesPlayed == 1 ? match.pointsFor + "-" + match.pointsAgainst : match.gamesFor + "-" + match.gamesAgainst) : "-"}}</td>
@@ -47,6 +47,23 @@
                     </tr>
                 </tbody>
             </table>
+
+            <table id="matches" class="tablesorter tablesorter-blue">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Matches Played</th>
+                        <th>Experience Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr template repeat="{{player in team.players}}">
+                        <td><a href="http://play.esea.net/users/{{player.player}}">{{player.alias}}</a></td>
+                        <td>{{player | matchesPlayed}}</a></td>
+                        <td>{{player.experienceRating}}</a></td>
+                    </tr>
+                </tbody>
+            </table>
         </paper-dialog>
     </template>
 
@@ -59,17 +76,7 @@
     <script>
         Polymer({
             "team": {},
-            "teamChanged": function(oldValue, newValue) {
-                this.async(this.sortTables);
-            },
             "expanded": false,
-            "sortTables": function() {
-                $("html /deep/ #matches").tablesorter({
-                    sortList: [[0, 0]],
-                    theme: 'blue',
-                    widgets: ['zebra']
-                });
-            },
             "capitalize": function(value) {
                 return value.charAt(0).toUpperCase() + value.slice(1);
             },
@@ -78,6 +85,18 @@
             },
             "normalizeDecimal": function(value) {
                 return numeral(value).format('0.000');
+            },
+            "matchesPlayed": function(value) {
+                var team = _.findWhere(value.teams, {
+                    team: this.team.team,
+                    game: this.team.game,
+                    season: this.team.season,
+                    series: this.team.series,
+                    event: this.team.event,
+                    division: this.team.division
+                });
+
+                return team.matches.length;
             }
         });
     </script>

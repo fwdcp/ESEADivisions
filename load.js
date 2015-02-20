@@ -192,7 +192,7 @@ async.auto({
             }
 
             streamWorker(database.TeamSeason.find(options, {'team': 1, 'series': 1, 'raw.history': 1}).stream(), 10, function(teamSeason, done) {
-                if (!teamSeason.raw.history) {
+                if (!commander.preload || !teamSeason.raw.history) {
                     ratelimiter.removeTokens(1, function() {
                         request({
                             uri: 'http://play.esea.net/teams/' + teamSeason.team,
@@ -367,7 +367,7 @@ async.auto({
             }
 
             streamWorker(database.Player.find(options, {'player': 1, 'raw.history': 1}).stream(), 10, function(player, done) {
-                if (!player.raw.history) {
+                if (!commander.preload || !player.raw.history) {
                     ratelimiter.removeTokens(1, function() {
                         request({
                             uri: 'http://play.esea.net/users/' + player.player,

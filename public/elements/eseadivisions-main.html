@@ -36,7 +36,7 @@
             </core-toolbar>
             <div main class="content">
                 <eseadivisions-teams id="teams" selectedTeam="{{expandedTeam}}"></eseadivisions-teams>
-                <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-open="{{openChanged}}">
+                <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-close-completed="{{dialogClosed}}">
                     <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
                 </paper-dialog>
             </div>
@@ -70,12 +70,8 @@
             "teams": [],
             "players": [],
             "selectedDivision": '',
-            "openChanged": function(event, detail, sender) {
-                if (!detail.opened) {
-                    this.async(function() {
-                        this.expandedTeam = null;
-                    });
-                }
+            "dialogClosed": function(event, detail, sender) {
+                this.expandedTeam = null;
             },
             "expandedTeam": null,
             "expandedTeamInfo": {},

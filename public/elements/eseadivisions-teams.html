@@ -70,10 +70,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
 
     <script>
-        PolymerExpressions.prototype.normalizeDecimal = function(value) {
-            return numeral(value).format('0.000');
-        };
-
         Polymer({
             "groups": [],
             "selectedTeam": null,
@@ -87,14 +83,17 @@
                     widgets: ['zebra']
                 });
             },
+            "selectTeam": function(event, detail, sender) {
+                this.selectedTeam = event.target.templateInstance.model.team.team;
+            },
             "toJSON": function(value) {
                 return JSON.stringify(value);
             },
             "capitalize": function(value) {
                 return value.charAt(0).toUpperCase() + value.slice(1);
             },
-            "selectTeam": function(event, detail, sender) {
-                this.selectedTeam = event.target.templateInstance.model.team.team;
+            "normalizeDecimal": function(value) {
+                return numeral(value).format('0.000');
             }
         });
     </script>

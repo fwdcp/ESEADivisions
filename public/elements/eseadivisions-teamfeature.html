@@ -1,0 +1,39 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+
+<polymer-element name="eseadivisions-teamfeature" attributes="team">
+    <template>
+        <paper-dialog heading="{{team.name}}" opened="{{expanded}}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Opponent</th>
+                        <th>Map</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr template repeat="{{match in matches}}">
+                        <td>{{match.startTime}}</td>
+                        <td>{{match.opposingTeamInfo.name}}</td>
+                        <td>{{match.gamesPlayed == 1 ? match.map : "Multiple"}}</td>
+                        <td>{{match.status == "completed" ? (match.gamesPlayed == 1 ? match.pointsFor + "-" + match.pointsAgainst : match.gamesFor + "-" + match.gamesAgainst) : "-"}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </paper-dialog>
+    </template>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/js/jquery.tablesorter.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/js/jquery.tablesorter.widgets.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
+
+    <script>
+        Polymer({
+            "team": {},
+            "expanded": false
+        });
+    </script>
+</polymer-element>

@@ -6,64 +6,66 @@
 
         <p><a href="http://play.esea.net/teams/{{team.team}}">Team Page</a></p>
 
-        <table id="matches" class="tablesorter tablesorter-blue">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Opponent</th>
-                    <th>Map</th>
-                    <th>Score</th>
-                    <th>Status</th>
-                    <th><abbr title="Opponent Wins">W</abbr></th>
-                    <th><abbr title="Opponent Losses">L</abbr></th>
-                    <th><abbr title="Opponent Ties">T</abbr></th>
-                    <th><abbr title="Opponent Record Percentage">PCT</abbr></th>
-                    <th><abbr title="Opponent Rounds For">RF</abbr></th>
-                    <th><abbr title="Opponent Rounds Against">RA</abbr></th>
-                    <th><abbr title="Opponent Rounds Percentage">RPCT</abbr></th>
-                    <th><abbr title="Opponent Experience Rating">ER</abbr></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr template repeat="{{match in team.matches}}">
-                    <td><a href="http://play.esea.net/index.php?s=stats&d=match&id={{match.id}}">{{match.startTime | formatDate}}</a></td>
-                    <td><a href="http://play.esea.net/teams/{{match.opposingTeam}}">{{match.opposingTeamInfo.name}}</a></td>
-                    <td>{{match.gamesPlayed == 1 ? match.map : "Multiple"}}</td>
-                    <td>{{match.status == "completed" ? (match.gamesPlayed == 1 ? match.pointsFor + "-" + match.pointsAgainst : match.gamesFor + "-" + match.gamesAgainst) : "-"}}</td>
-                    <td>
-                        {{match.status | capitalize}}
-                        <template if="{{match.outcomeType && match.outcomeType != 'normal'}}">
-                            ({{match.outcomeType | capitalize}})
-                        </template>
-                    </td>
-                    <td>{{match.opposingTeamInfo.record.wins}}</td>
-                    <td>{{match.opposingTeamInfo.record.losses}}</td>
-                    <td>{{match.opposingTeamInfo.record.ties}}</td>
-                    <td>{{(match.opposingTeamInfo.record.wins + (0.5 * match.opposingTeamInfo.record.ties)) / (match.opposingTeamInfo.record.wins + match.opposingTeamInfo.record.losses + match.opposingTeamInfo.record.ties) | normalizeDecimal}}</td>
-                    <td>{{match.opposingTeamInfo.record.pointsFor}}</td>
-                    <td>{{match.opposingTeamInfo.record.pointsAgainst}}</td>
-                    <td>{{(match.opposingTeamInfo.record.pointsFor) / (match.opposingTeamInfo.record.pointsFor + match.opposingTeamInfo.record.pointsAgainst) | normalizeDecimal}}</td>
-                    <td>{{match.opposingTeamInfo.experienceRating | normalizeDecimal}}</td>
-                </tr>
-            </tbody>
-        </table>
+        <div id="teamfeature-tables">
+            <table id="matches" class="tablesorter">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Opponent</th>
+                        <th>Map</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th><abbr title="Opponent Wins">W</abbr></th>
+                        <th><abbr title="Opponent Losses">L</abbr></th>
+                        <th><abbr title="Opponent Ties">T</abbr></th>
+                        <th><abbr title="Opponent Record Percentage">PCT</abbr></th>
+                        <th><abbr title="Opponent Rounds For">RF</abbr></th>
+                        <th><abbr title="Opponent Rounds Against">RA</abbr></th>
+                        <th><abbr title="Opponent Rounds Percentage">RPCT</abbr></th>
+                        <th><abbr title="Opponent Experience Rating">ER</abbr></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr template repeat="{{match in team.matches}}">
+                        <td><a href="http://play.esea.net/index.php?s=stats&d=match&id={{match.id}}">{{match.startTime | formatDate}}</a></td>
+                        <td><a href="http://play.esea.net/teams/{{match.opposingTeam}}">{{match.opposingTeamInfo.name}}</a></td>
+                        <td>{{match.gamesPlayed == 1 ? match.map : "Multiple"}}</td>
+                        <td>{{match.status == "completed" ? (match.gamesPlayed == 1 ? match.pointsFor + "-" + match.pointsAgainst : match.gamesFor + "-" + match.gamesAgainst) : "-"}}</td>
+                        <td>
+                            {{match.status | capitalize}}
+                            <template if="{{match.outcomeType && match.outcomeType != 'normal'}}">
+                                ({{match.outcomeType | capitalize}})
+                            </template>
+                        </td>
+                        <td>{{match.opposingTeamInfo.record.wins}}</td>
+                        <td>{{match.opposingTeamInfo.record.losses}}</td>
+                        <td>{{match.opposingTeamInfo.record.ties}}</td>
+                        <td>{{(match.opposingTeamInfo.record.wins + (0.5 * match.opposingTeamInfo.record.ties)) / (match.opposingTeamInfo.record.wins + match.opposingTeamInfo.record.losses + match.opposingTeamInfo.record.ties) | normalizeDecimal}}</td>
+                        <td>{{match.opposingTeamInfo.record.pointsFor}}</td>
+                        <td>{{match.opposingTeamInfo.record.pointsAgainst}}</td>
+                        <td>{{(match.opposingTeamInfo.record.pointsFor) / (match.opposingTeamInfo.record.pointsFor + match.opposingTeamInfo.record.pointsAgainst) | normalizeDecimal}}</td>
+                        <td>{{match.opposingTeamInfo.experienceRating | normalizeDecimal}}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-        <table id="players" class="tablesorter tablesorter-blue">
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th>Matches Played</th>
-                    <th>Experience Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr template repeat="{{player in team.players}}">
-                    <td><a href="http://play.esea.net/users/{{player.player}}">{{player.alias}}</a></td>
-                    <td>{{player | matchesPlayed}}</a></td>
-                    <td>{{player.experienceRating}}</a></td>
-                </tr>
-            </tbody>
-        </table>
+            <table id="players" class="tablesorter">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Matches Played</th>
+                        <th>Experience Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr template repeat="{{player in team.players}}">
+                        <td><a href="http://play.esea.net/users/{{player.player}}">{{player.alias}}</a></td>
+                        <td>{{player | matchesPlayed}}</a></td>
+                        <td>{{player.experienceRating}}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </template>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -82,13 +84,14 @@
                 this.async(this.sortTables);
             },
             "sortTables": function() {
-                $("html /deep/ #matches").tablesorter({
+                console.log(this.$)
+                $("html /deep/ #teamfeature-tables /deep/ #matches").tablesorter({
                     sortList: [[0, 0]],
                     theme: 'blue',
                     widgets: ['zebra']
                 });
 
-                $("html /deep/ #players").tablesorter({
+                $("html /deep/ #teamfeature-tables /deep/ #players").tablesorter({
                     sortList: [[1, 1], [2, 1]],
                     theme: 'blue',
                     widgets: ['zebra']

@@ -75,7 +75,11 @@
                 this.expandedTeam = null;
             },
             "expandedTeam": null,
-            "expandedTeamInfo": null,
+            "expandedTeamInfo": {
+                name: '',
+                matches: [],
+                players: []
+            },
             "expandedTeamChanged": function(oldValue, newValue) {
                 this.expandedTeamInfo = _.findWhere(this.teams, {team: this.expandedTeam});
 
@@ -122,7 +126,11 @@
                     });
                 }
                 else {
-                    this.expandedTeamInfo = null;
+                    this.expandedTeamInfo = {
+                        name: '',
+                        matches: [],
+                        players: []
+                    };
                 }
             },
             "updateDivisions": function(event, detail, sender) {

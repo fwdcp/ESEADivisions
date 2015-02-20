@@ -83,7 +83,7 @@
                     this.expandedTeamInfo.matches[i].opposingTeamInfo = _.findWhere(this.teams, {team: this.expandedTeamInfo.matches[i].opposingTeam});
                 }
 
-                this.expandedTeam.players = _.filter(this.players, function(player) {
+                this.expandedTeamInfo.players = _.filter(this.players, function(player) {
                     var team = _.findWhere(player.teams, {
                         game: this.expandedTeamInfo.game,
                         season: this.expandedTeamInfo.season,

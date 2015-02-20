@@ -87,6 +87,9 @@
                 $("html /deep/ #teamfeature-tables /deep/ #matches").trigger("destroy");
                 $("html /deep/ #teamfeature-tables /deep/ #players").trigger("destroy");
 
+                $("html /deep/ #teamfeature-tables /deep/ #matches tr").css("display", "");
+                $("html /deep/ #teamfeature-tables /deep/ #players tr").css("display", "");
+
                 $("html /deep/ #teamfeature-tables /deep/ #matches").tablesorter({
                     sortList: [[0, 0]],
                     theme: 'blue',

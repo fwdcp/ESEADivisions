@@ -320,13 +320,15 @@ async.auto({
             streamWorker(database.TeamSeason.find(options, {'team': 1, 'raw.history.team_roster': 1}).stream(), 10, function(teamSeason, done) {
                 if (teamSeason.raw.history.team_roster) {
                     async.each(teamSeason.raw.history.team_roster, function(playerInfo, cb) {
-                        incrementalPlayers.push(playerInfo.id);
-
                         queryQueue.push(database.Player.findOne({player: playerInfo.id}, {'player': 1, 'alias': 1}), function(err, player) {
                             if (err) {
                                 cb(err);
                             }
                             else {
+                                if (!commander.incremental || !player || underscore.contains(incrementalTeams, teamSeason.team)) {
+                                    incrementalPlayers.push(playerInfo.id);
+                                }
+
                                 if (!player) {
                                     player = new database.Player({
                                         player: playerInfo.id

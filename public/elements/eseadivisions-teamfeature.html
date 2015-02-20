@@ -14,7 +14,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr template repeat="{{match in matches}}">
+                    <tr template repeat="{{match in team.matches}}">
                         <td>{{match.startTime}}</td>
                         <td>{{match.opposingTeamInfo.name}}</td>
                         <td>{{match.gamesPlayed == 1 ? match.map : "Multiple"}}</td>

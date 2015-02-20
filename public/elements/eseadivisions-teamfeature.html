@@ -3,22 +3,47 @@
 
 <polymer-element name="eseadivisions-teamfeature" attributes="team expanded">
     <template>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/css/theme.blue.css">
+        
         <paper-dialog heading="{{team.name}}" opened="{{expanded}}">
-            <table>
+            <table id="matches">
                 <thead>
                     <tr>
                         <th>Time</th>
                         <th>Opponent</th>
                         <th>Map</th>
                         <th>Score</th>
+                        <th>Status</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>T</th>
+                        <th>PCT</th>
+                        <th>RF</th>
+                        <th>RA</th>
+                        <th>RPCT</th>
+                        <th>ER</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr template repeat="{{match in team.matches}}">
-                        <td>{{match.startTime}}</td>
-                        <td>{{match.opposingTeamInfo.name}}</td>
+                        <td>{{match.startTime | formatDate}}</td>
+                        <td><a href="http://play.esea.net/teams/{{match.opposingTeam}}">{{match.opposingTeamInfo.name}}</a></td>
                         <td>{{match.gamesPlayed == 1 ? match.map : "Multiple"}}</td>
                         <td>{{match.status == "completed" ? (match.gamesPlayed == 1 ? match.pointsFor + "-" + match.pointsAgainst : match.gamesFor + "-" + match.gamesAgainst) : "-"}}</td>
+                        <td>
+                            {{match.status | capitalize}}
+                            <template if="{{match.outcomeType && match.outcomeType != 'normal'}}">
+                                ({{match.outcomeType | capitalize}})
+                            </template>
+                        </td>
+                        <td>{{match.opposingTeamInfo.record.wins}}</td>
+                        <td>{{match.opposingTeamInfo.record.losses}}</td>
+                        <td>{{match.opposingTeamInfo.record.ties}}</td>
+                        <td>{{(match.opposingTeamInfo.record.wins + (0.5 * match.opposingTeamInfo.record.ties)) / (match.opposingTeamInfo.record.wins + match.opposingTeamInfo.record.losses + match.opposingTeamInfo.record.ties) | normalizeDecimal}}</td>
+                        <td>{{match.opposingTeamInfo.record.pointsFor}}</td>
+                        <td>{{match.opposingTeamInfo.record.pointsAgainst}}</td>
+                        <td>{{(match.opposingTeamInfo.record.pointsFor) / (match.opposingTeamInfo.record.pointsFor + match.opposingTeamInfo.record.pointsAgainst) | normalizeDecimal}}</td>
+                        <td>{{match.opposingTeamInfo.experienceRating | normalizeDecimal}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -28,12 +53,32 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/js/jquery.tablesorter.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/js/jquery.tablesorter.widgets.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
 
     <script>
         Polymer({
             "team": {},
-            "expanded": false
+            "teamChanged": function(oldValue, newValue) {
+                this.async(this.sortTables);
+            },
+            "expanded": false,
+            "sortTables": function() {
+                $("html /deep/ #matches").tablesorter({
+                    sortList: [[0, 0]],
+                    theme: 'blue',
+                    widgets: ['zebra']
+                });
+            },
+            "capitalize": function(value) {
+                return value.charAt(0).toUpperCase() + value.slice(1);
+            },
+            "formatDate": function(value) {
+                return moment(value).format("YYYY-MM-DD");
+            },
+            "normalizeDecimal": function(value) {
+                return numeral(value).format('0.000');
+            }
         });
     </script>
 </polymer-element>

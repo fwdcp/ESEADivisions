@@ -36,7 +36,7 @@
             </core-toolbar>
             <div main class="content">
                 <eseadivisions-teams id="teams" selectedTeam="{{expandedTeam}}"></eseadivisions-teams>
-                <paper-dialog backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-open="{{openChanged}}">
+                <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-open="{{openChanged}}">
                     <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
                 </paper-dialog>
             </div>
@@ -118,6 +118,8 @@
 
                     return team.matches.length;
                 }, this).reverse();
+
+                this.$.dialog.open();
             },
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {

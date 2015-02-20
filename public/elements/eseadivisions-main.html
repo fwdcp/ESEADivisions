@@ -36,11 +36,12 @@
             </core-toolbar>
             <div main class="content">
                 <eseadivisions-teams id="teams" selectedTeam="{{expandedTeam}}"></eseadivisions-teams>
-                <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-close-completed="{{dialogClosed}}">
-                    <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
-                </paper-dialog>
             </div>
         </core-header-panel>
+        
+        <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-close-completed="{{dialogClosed}}">
+            <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
+        </paper-dialog>
 
         <paper-toast text="Division info has been retrieved." id="divisionRetrievedNotification"></paper-toast>
         <paper-toast text="Error retrieving division info." id="divisionRetrievalFailedNotification"><div on-click="{{refreshDivision}}">Retry</div></paper-toast>

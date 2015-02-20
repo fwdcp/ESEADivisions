@@ -1,11 +1,11 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="eseadivisions-teams" attributes="teams">
+<polymer-element name="eseadivisions-teams" attributes="groups">
     <template>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.19.1/css/theme.blue.css">
 
         <div id="team-tables">
-            <template repeat="{{group in teams}}">
+            <template repeat="{{group in groups}}">
                 <template if="{{group.length}}">
                     <h3>{{group[0].conference | capitalize}} Conference, {{group[0].group}}</h3>
                 </template>
@@ -75,8 +75,8 @@
         };
 
         Polymer({
-            "teams": [],
-            "teamsChanged": function(oldValue, newValue) {
+            "groups": [],
+            "groupsChanged": function(oldValue, newValue) {
                 this.async(this.sortTables);
             },
             "sortTables": function() {

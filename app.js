@@ -64,7 +64,7 @@ express.get('/divisions/:id.json', function(req, res) {
 
         return;
     }
-    
+
     if (!currentInfoUpdates[req.params.id]) {
         currentInfoUpdates[req.params.id] = new events.EventEmitter();
 
@@ -93,16 +93,30 @@ express.get('/divisions/:id.json', function(req, res) {
     });
 
     currentInfoUpdates[req.params.id].once('complete', function() {
-        database.TeamSeason.find({event: req.params.id}, function(err, teamSeasons) {
+        async.auto({
+            teamSeasons: function(cb) {
+                database.TeamSeason.find({event: req.params.id}, cb);
+            },
+            players: function(cb) {
+                database.Player.find({'team.event': req.params.id}, cb);
+            }
+        }, function(err, results) {
             if (err) {
-                console.log(err);
+                console.error(err);
 
                 res.sendStatus(500);
             }
             else {
-                res.json(underscore.map(teamSeasons, function(teamSeason) {
-                    return underscore.omit(teamSeason.toObject(), 'raw', '__v', '_id');
-                }));
+                var info = {
+                    teams: underscore.map(results.teamSeasons, function(teamSeason) {
+                        return underscore.omit(teamSeason.toObject(), 'raw', '__v', '_id');
+                    }),
+                    players: underscore.map(results.players, function(player) {
+                        return underscore.omit(player.toObject(), 'raw', '__v', '_id');
+                    })
+                };
+
+                res.json(info);
             }
         });
     });

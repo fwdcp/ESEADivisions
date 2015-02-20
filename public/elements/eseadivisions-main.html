@@ -62,6 +62,7 @@
         Polymer({
             "divisions": [],
             "teams": [],
+            "players": [],
             "selectedDivision": '',
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {
@@ -75,11 +76,12 @@
             },
             "updateDivision": function(event, detail, sender) {
                 if (this.selectedDivision && sender.response) {
-                    this.teams = sender.response;
+                    this.teams = sender.response.teams;
+                    this.players = sender.response.players;
                     this.$.divisionRetrievedNotification.show();
                 }
 
-                this.$.teams.teams = _.flatten(_.map(_.groupBy(this.teams, 'conference'), function(conference) {
+                this.$.teams.groups = _.flatten(_.map(_.groupBy(this.teams, 'conference'), function(conference) {
                     return _.toArray(_.groupBy(conference, 'group'));
                 }), true);
             },

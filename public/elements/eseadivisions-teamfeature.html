@@ -3,7 +3,7 @@
 
 <polymer-element name="eseadivisions-teamfeature" attributes="team">
     <template>
-        <paper-dialog id="dialog" heading="{{team.name}}">
+        <paper-dialog heading="{{team.name}}" opened="{{expanded}}">
             <table>
                 <thead>
                     <tr>
@@ -33,15 +33,7 @@
     <script>
         Polymer({
             "team": {},
-            "expanded": false,
-            "expandedChanged": function(oldValue, newValue) {
-                if (newValue) {
-                    this.$.dialog.open();
-                }
-                else {
-                    this.$.dialog.close();
-                }
-            }
+            "expanded": false
         });
     </script>
 </polymer-element>

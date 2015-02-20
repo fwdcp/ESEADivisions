@@ -33,7 +33,7 @@
                 </paper-dropdown-menu>
             </core-toolbar>
             <div main class="content">
-                <eseadivisions-teams id="teams"></eseadivisions-teams>
+                <eseadivisions-teams id="teams" expandedTeam="{{expandedTeam}}"></eseadivisions-teams>
             </div>
         </core-header-panel>
 
@@ -64,6 +64,7 @@
             "teams": [],
             "players": [],
             "selectedDivision": '',
+            "expandedTeam": null,
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {
                     this.divisions = sender.response;

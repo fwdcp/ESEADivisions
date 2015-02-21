@@ -78,7 +78,7 @@
             "expandedTeam": null,
             "expandedTeamInfo": null,
             "expandedTeamChanged": function(oldValue, newValue) {
-                this.expandedTeamInfo = _.findWhere(this.teams, {team: this.expandedTeam});
+                this.expandedTeamInfo = _.findWhere(this.teams, {team: +this.expandedTeam});
 
                 if (this.expandedTeamInfo) {
                     for (var i = 0; i < this.expandedTeamInfo.matches.length; i++) {

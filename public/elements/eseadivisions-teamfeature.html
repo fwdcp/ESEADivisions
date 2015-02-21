@@ -7,6 +7,55 @@
         <p><a href="http://play.esea.net/teams/{{team.team}}">Team Page</a></p>
 
         <div id="teamfeature-tables">
+            <table id="general-info" class="tablesorter tablesorter-blue">
+                <thead>
+                    <tr>
+                        <th><abbr title="Wins">W</abbr></th>
+                        <th><abbr title="Losses">L</abbr></th>
+                        <th><abbr title="Ties">T</abbr></th>
+                        <th><abbr title="Record Percentage">PCT</abbr></th>
+                        <th><abbr title="Rounds For">RF</abbr></th>
+                        <th><abbr title="Rounds Against">RA</abbr></th>
+                        <th><abbr title="Rounds Percentage">RPCT</abbr></th>
+                        <th><abbr title="Matches Played">MP</abbr></th>
+                        <th><abbr title="Forfeit Wins">FFW</abbr></th>
+                        <th><abbr title="Forfeit Losses">FFL</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Wins">SOS-W</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Losses">SOS-L</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Ties">SOS-T</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Record Percentage">SOS-PCT</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Rounds For">SOS-RF</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Rounds Against">SOS-RA</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Rounds Percentage">SOS-RPCT</abbr></th>
+                        <th><abbr title="Experience Rating">ER</abbr></th>
+                        <th><abbr title="Schedule of Strength - Opponent Experience Rating">SOS-ER</abbr></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{team.record.wins}}</td>
+                        <td>{{team.record.losses}}</td>
+                        <td>{{team.record.ties}}</td>
+                        <td>{{(team.record.wins + (0.5 * team.record.ties)) / (team.record.wins + team.record.losses + team.record.ties) | normalizeDecimal}}</td>
+                        <td>{{team.record.pointsFor}}</td>
+                        <td>{{team.record.pointsAgainst}}</td>
+                        <td>{{(team.record.pointsFor) / (team.record.pointsFor + team.record.pointsAgainst) | normalizeDecimal}}</td>
+                        <td>{{team.record.wins + team.record.losses + team.record.ties}}</td>
+                        <td>{{team.forfeits.wins}}</td>
+                        <td>{{team.forfeits.losses}}</td>
+                        <td>{{team.scheduleStrength.wins}}</td>
+                        <td>{{team.scheduleStrength.losses}}</td>
+                        <td>{{team.scheduleStrength.ties}}</td>
+                        <td>{{(team.scheduleStrength.wins + (0.5 * team.scheduleStrength.ties)) / (team.scheduleStrength.wins + team.scheduleStrength.losses + team.scheduleStrength.ties) | normalizeDecimal}}</td>
+                        <td>{{team.scheduleStrength.pointsFor}}</td>
+                        <td>{{team.scheduleStrength.pointsAgainst}}</td>
+                        <td>{{(team.scheduleStrength.pointsFor) / (team.scheduleStrength.pointsFor + team.scheduleStrength.pointsAgainst) | normalizeDecimal}}</td>
+                        <td>{{team.experienceRating | normalizeDecimal}}</td>
+                        <td>{{team.scheduleStrength.experienceRating | normalizeDecimal}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
             <table id="matches" class="tablesorter">
                 <thead>
                     <tr>

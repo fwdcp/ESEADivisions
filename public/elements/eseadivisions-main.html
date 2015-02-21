@@ -24,7 +24,7 @@
         <core-header-panel flex>
             <core-toolbar>
                 <span>ESEA Divisions</span>
-                <paper-dropdown-menu label="Division" on-core-select="{{selectDivision}}">
+                <paper-dropdown-menu label="Division">
                     <paper-dropdown class="dropdown">
                         <core-menu selected="{{selectedDivision}}" valueattr="data-division-id" class="menu">
                             <template repeat="{{division in divisions}}">
@@ -148,14 +148,9 @@
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {
                     this.divisions = sender.response;
-                }
-            },
-            "selectDivision": function(event, detail, sender) {
-                if (detail.isSelected) {
-                    this.selectedDivision = detail.item.dataset.divisionId;
-                }
 
-                this.updateURI();
+                    this.updateSelectionsFromURI();
+                }
             },
             "updateDivision": function(event, detail, sender) {
                 if (this.selectedDivision && sender.response) {

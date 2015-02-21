@@ -128,20 +128,12 @@
     <script>
         Polymer({
             "team": null,
-            "capitalize": function(value) {
-                return value.charAt(0).toUpperCase() + value.slice(1);
-            },
-            "teamChanged": function(oldValue, newValue) {
-                this.async(this.clearAndSortTables);
-            },
-            "clearAndSortTables": function() {
+            "clearTables": function() {
                 $("html /deep/ #teamfeature-tables /deep/ #matches").trigger("destroy");
                 $("html /deep/ #teamfeature-tables /deep/ #players").trigger("destroy");
 
                 $("html /deep/ #teamfeature-tables /deep/ #matches tr").css("display", "");
                 $("html /deep/ #teamfeature-tables /deep/ #players tr").css("display", "");
-
-                this.async(this.sortTables);
             },
             "sortTables": function() {
                 $("html /deep/ #teamfeature-tables /deep/ #matches").tablesorter({
@@ -155,6 +147,9 @@
                     theme: 'blue',
                     widgets: ['zebra']
                 });
+            },
+            "capitalize": function(value) {
+                return value.charAt(0).toUpperCase() + value.slice(1);
             },
             "formatDate": function(value) {
                 return moment(value).format("YYYY-MM-DD");

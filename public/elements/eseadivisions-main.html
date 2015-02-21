@@ -102,8 +102,14 @@
                         }
                     }, this);
 
+                    this.$.teamfeature.clearTables();
+
                     this.async(function() {
-                        this.$.dialog.open();
+                        this.$.teamfeature.sortTables();
+
+                        this.async(function() {
+                            this.$.dialog.open();
+                        });
                     });
                 }
                 else {

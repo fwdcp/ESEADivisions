@@ -39,7 +39,7 @@
             </div>
         </core-header-panel>
 
-        <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo.name}}" on-core-overlay-close-completed="{{dialogClosed}}">
+        <paper-dialog id="dialog" backdrop heading="{{expandedTeamInfo ? expandedTeamInfo.name : ''}}" on-core-overlay-close-completed="{{dialogClosed}}">
             <eseadivisions-teamfeature id="teamfeature" team="{{expandedTeamInfo}}"></eseadivisions-teamfeature>
         </paper-dialog>
 
@@ -75,11 +75,7 @@
                 this.expandedTeam = null;
             },
             "expandedTeam": null,
-            "expandedTeamInfo": {
-                name: '',
-                matches: [],
-                players: []
-            },
+            "expandedTeamInfo": null,
             "expandedTeamChanged": function(oldValue, newValue) {
                 this.expandedTeamInfo = _.findWhere(this.teams, {team: this.expandedTeam});
 
@@ -111,11 +107,7 @@
                     });
                 }
                 else {
-                    this.expandedTeamInfo = {
-                        name: '',
-                        matches: [],
-                        players: []
-                    };
+                    this.expandedTeamInfo = null;
                 }
             },
             "updateDivisions": function(event, detail, sender) {

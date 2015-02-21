@@ -26,7 +26,7 @@
                 <span>ESEA Divisions</span>
                 <paper-dropdown-menu label="Division" on-core-select="{{selectDivision}}">
                     <paper-dropdown class="dropdown">
-                        <core-menu class="menu">
+                        <core-menu selected="{{selectedDivision}}" valueattr="data-division-id" class="menu">
                             <template repeat="{{division in divisions}}">
                                 <paper-item data-division-id="{{division.id}}">{{division.season}} {{division.region}} {{division.division}}</paper-item>
                             </template>
@@ -116,6 +116,32 @@
                     this.expandedTeamInfo = null;
                 }
             },
+            "updateURI": function() {
+                var uri = new URI(window.location);
+
+                uri.query({});
+
+                if (this.selectedDivision) {
+                    uri.addQuery("division", this.selectedDivision);
+                }
+
+                if (this.expandedTeam) {
+                    uri.addQuery("team", this.expandedTeam);
+                }
+
+                history.pushState(null, "", uri.toString());
+            },
+            "updateSelectionsFromURI": function() {
+                var query = new URI(window.location).query(true);
+
+                if (_.has(query, "division")) {
+                    this.selectedDivision = query.division;
+                }
+
+                if (_.has(query, "team")) {
+                    this.expandedTeam = query.team;
+                }
+            },
             "updateDivisions": function(event, detail, sender) {
                 if (sender.response) {
                     this.divisions = sender.response;
@@ -131,6 +157,10 @@
                     this.teams = sender.response.teams;
                     this.players = sender.response.players;
                     this.$.divisionRetrievedNotification.show();
+
+                    if (this.expandedTeam) {
+                        this.expandedTeamChanged();
+                    }
                 }
 
                 this.$.teams.groups = _.flatten(_.map(_.groupBy(this.teams, 'conference'), function(conference) {
@@ -147,6 +177,11 @@
             },
             "refreshDivision": function(event, detail, sender) {
                 this.$.divisionAPI.go();
+            },
+            "ready": function() {
+                window.addEventListener("popstate", function(event) {
+                    this.updateSelectionsFromURI();
+                }.bind(this));
             }
         });
     </script>

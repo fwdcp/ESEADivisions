@@ -115,6 +115,8 @@
                 else {
                     this.expandedTeamInfo = null;
                 }
+
+                this.updateURI();
             },
             "updateURI": function() {
                 var uri = new URI(window.location);
@@ -151,6 +153,8 @@
                 if (detail.isSelected) {
                     this.selectedDivision = detail.item.dataset.divisionId;
                 }
+
+                this.updateURI();
             },
             "updateDivision": function(event, detail, sender) {
                 if (this.selectedDivision && sender.response) {

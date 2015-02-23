@@ -72,6 +72,9 @@
             "teams": [],
             "players": [],
             "selectedDivision": null,
+            "selectedDivisionChanged": function(oldValue, newValue) {
+                this.updateURI();    
+            },
             "dialogClosed": function(event, detail, sender) {
                 this.expandedTeam = null;
             },
